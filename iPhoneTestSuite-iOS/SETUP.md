@@ -43,6 +43,7 @@ Add these privacy permission descriptions:
 ## Step 3: Add Capabilities
 
 In Xcode:
+
 1. Select your project
 2. Select your target
 3. Go to **Signing & Capabilities**
@@ -70,14 +71,17 @@ Copy all `.swift` files from this repository into your Xcode project:
 ## Troubleshooting
 
 ### Code Signing Issues
+
 - Make sure you have a valid Apple Developer account
 - Check that your device is added to your provisioning profile
 
 ### Permission Denied
+
 - Make sure all Info.plist entries are added
 - Check Settings → Privacy on your device
 
 ### Build Errors
+
 - Clean Build Folder (⌘⇧K)
 - Delete Derived Data
 - Restart Xcode
@@ -85,6 +89,7 @@ Copy all `.swift` files from this repository into your Xcode project:
 ## Testing on Simulator vs Device
 
 ⚠️ **Important:** Many tests require a physical device:
+
 - Proximity sensor
 - Face ID / Touch ID (can simulate on device)
 - True accelerometer/gyroscope data
@@ -93,6 +98,7 @@ Copy all `.swift` files from this repository into your Xcode project:
 - Flashlight
 
 The simulator can test:
+
 - UI/UX
 - Display colors
 - Basic touch input

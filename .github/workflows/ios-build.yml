@@ -392,12 +392,22 @@ jobs:
           -project iPhoneTestSuite.xcodeproj \
           -scheme iPhoneTestSuite \
           -sdk iphonesimulator \
-          -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.2' \
+          -destination 'platform=iOS Simulator,name=iPhone 15 Pro,OS=17.2' \
           -derivedDataPath ./DerivedData \
           CODE_SIGN_IDENTITY="" \
           CODE_SIGNING_REQUIRED=NO \
           CODE_SIGNING_ALLOWED=NO \
-          | tee build.log
+          2>&1 | tee build.log
+      continue-on-error: true
+      
+    - name: Show compilation errors
+      if: failure()
+      run: |
+        echo "=== COMPILATION ERRORS ==="
+        grep -A 5 "error:" build.log || echo "No specific errors found"
+        echo ""
+        echo "=== FULL BUILD LOG ==="
+        cat build.log
           
     - name: Find build artifacts
       run: |

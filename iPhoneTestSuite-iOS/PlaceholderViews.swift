@@ -1,4 +1,5 @@
 import SwiftUI
+import CoreMotion
 
 // Placeholder views for tests not yet fully implemented
 
@@ -465,5 +466,3 @@ struct PlaceholderTestView: View {
         .padding()
     }
 }
-
-import CoreMotion

@@ -1040,18 +1040,18 @@ function testProximity() {
     "⚠️ Web prehliadače nemajú prístup k proximity senzoru.\nJediný spôsob testovania je počas hovoru.",
     "warning"
   );
-  
+
   manualProximityTest();
 }
 
-  function manualProximityTest() {
-    showStatus(
-      "proximity-status",
-      "⚠️ Proximity API nie je v Safari dostupné.\nSpustím manuálny test...",
-      "warning"
-    );
+function manualProximityTest() {
+  showStatus(
+    "proximity-status",
+    "⚠️ Proximity API nie je v Safari dostupné.\nSpustím manuálny test...",
+    "warning"
+  );
 
-    const content = `
+  const content = `
       <div style="padding: 40px; text-align: center;">
         <h2>🔍 Proximity Sensor Test</h2>
         <p style="margin: 20px 0; font-size: 1.1rem;">
@@ -1089,7 +1089,7 @@ function testProximity() {
       </div>
     `;
 
-    openModal(content);
+  openModal(content);
 
   function manualProximityTest() {
     const content = `

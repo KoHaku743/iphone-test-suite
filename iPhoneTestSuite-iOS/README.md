@@ -5,6 +5,7 @@ This is the native iOS version of the iPhone Test Suite with full hardware acces
 ## Features
 
 ✅ **Complete Hardware Testing:**
+
 - LCD & Display Tests (multi-color, dead pixels, corners)
 - Multi-Touch & Haptic Touch
 - Both Speakers (Top/Bottom) with real audio
@@ -65,6 +66,7 @@ iPhoneTestSuite-iOS/
 ## Building the Project
 
 This is a standalone iOS project. You'll need to:
+
 1. Create a new Xcode project
 2. Copy all Swift files
 3. Configure Info.plist permissions

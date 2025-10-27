@@ -367,6 +367,7 @@ struct BatteryTestView: View {
     @Environment(\.dismiss) var dismiss
     @State private var batteryLevel: Float = 0
     @State private var batteryState: UIDevice.BatteryState = .unknown
+    @State private var timer: Timer?
     
     var body: some View {
         GeometryReader { geometry in
@@ -474,9 +475,13 @@ struct BatteryTestView: View {
             updateBatteryInfo()
             
             // Update battery info every 2 seconds
-            Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true) { _ in
+            timer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true) { _ in
                 updateBatteryInfo()
             }
+        }
+        .onDisappear {
+            timer?.invalidate()
+            timer = nil
         }
     }
     

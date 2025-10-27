@@ -115,8 +115,8 @@ struct ContentView: View {
                 }
                 .frame(minWidth: geometry.size.width)
             }
-            .navigationBarTitleDisplayMode(.inline)
         }
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
 

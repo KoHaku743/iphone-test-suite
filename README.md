@@ -1,22 +1,11 @@
 # iPhone Test Suite
 
-Komplexná webová aplikácia pre testovanie funkcií iPhone zariadení.
-
-## Funkcie
-
-### 🔍 Vizuálna kontrola
 
 - LCD test (pixely, škvrny)
 - Test rohov displeja
-- Test škrtov
-
-### 📱 Displej & Dotyk
 
 - Multi-touch test
 - 3D Touch / Haptic Touch
-- TrueTone & NightShift
-
-### 🔊 Zvuk
 
 - Horný reproduktor (earpiece)
 - Dolný reproduktor (stereo)
@@ -27,19 +16,17 @@ Komplexná webová aplikácia pre testovanie funkcií iPhone zariadení.
 - Zadná kamera (ostrenie, zoom)
 - Predná kamera (FaceTime)
 
-### 🎯 Senzory
-
-- Proximity senzor
-- FaceID / TouchID
 - Gyroskop
 - Akcelerometer
 
-### 🌐 Konektivita
-
-- WiFi
-- Bluetooth
-- GPS
 - NFC / Apple Pay
+
+## Rýchla inštalácia pre technikov
+
+- Profil na stiahnutie (Home Screen ikona): `profiles/webclip-iphone-test-suite.mobileconfig`.
+- Ďalšie možnosti distribúcie (TestFlight, Ad Hoc OTA, AltStore/Sideloadly): pozri `DISTRIBUTION.md`.
+
+Poznámka: Webová verzia nemá prístup k proximity senzoru (obmedzenie iOS). Pre plné hardvérové testy použite natívnu iOS aplikáciu v branche `ios-native-app` (návod v `INSTALL.md`).
 - SIM karta (hovory, SMS, dáta)
 
 ### 🔋 Batéria & Nabíjanie

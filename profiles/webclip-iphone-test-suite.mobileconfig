@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>PayloadContent</key>
+  <array>
+    <dict>
+      <key>FullScreen</key>
+      <true/>
+      <key>IsRemovable</key>
+      <true/>
+      <key>Label</key>
+      <string>iPhone Test Suite</string>
+      <key>PayloadDescription</key>
+      <string>Adds a Home Screen shortcut to the iPhone Test Suite website for quick access during repairs.</string>
+      <key>PayloadDisplayName</key>
+      <string>Web Clip</string>
+      <key>PayloadIdentifier</key>
+      <string>com.pcexpres.iphone-test-suite.webclip</string>
+      <key>PayloadType</key>
+      <string>com.apple.webClip.managed</string>
+      <key>PayloadUUID</key>
+      <string>F3E2C6C8-3B9D-4E5A-8A79-64B9C7A8B2B7</string>
+      <key>PayloadVersion</key>
+      <integer>1</integer>
+      <key>Precomposed</key>
+      <true/>
+      <key>URL</key>
+      <string>https://kohaku743.github.io/iphone-test-suite/</string>
+      <!-- Optionally include a Base64 icon.
+      <key>Icon</key>
+      <data>
+      </data>
+      -->
+    </dict>
+  </array>
+  <key>PayloadDisplayName</key>
+  <string>Install iPhone Test Suite (Web Clip)</string>
+  <key>PayloadIdentifier</key>
+  <string>com.pcexpres.iphone-test-suite.profile</string>
+  <key>PayloadRemovalDisallowed</key>
+  <false/>
+  <key>PayloadType</key>
+  <string>Configuration</string>
+  <key>PayloadUUID</key>
+  <string>0C7B55B1-2B7F-4D3D-9E60-2A1F4DDF8E21</string>
+  <key>PayloadVersion</key>
+  <integer>1</integer>
+</dict>
+</plist>

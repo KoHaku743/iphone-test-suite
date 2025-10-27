@@ -321,6 +321,10 @@ function testTopSpeaker() {
         ⏹ Zastaviť
       </button>
       
+      <div id="top-speaker-status" style="margin: 20px 0; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 8px; font-size: 1.1rem;">
+        Stlač tlačidlo ▶ Prehrať zvuk
+      </div>
+      
       <div style="margin-top: 30px;">
         <p style="margin: 10px 0;">Počuješ zvuk cez horný reproduktor?</p>
         <button onclick="completeTopSpeakerTest(true)" 
@@ -347,15 +351,15 @@ function testTopSpeaker() {
     try {
       // Stop any existing audio first
       window.stopTopSpeaker();
-      
+
       const AudioContext = window.AudioContext || window.webkitAudioContext;
       audioContext = new AudioContext();
-      
+
       // Resume audio context (iOS requirement)
-      if (audioContext.state === 'suspended') {
+      if (audioContext.state === "suspended") {
         await audioContext.resume();
       }
-      
+
       oscillator = audioContext.createOscillator();
       gainNode = audioContext.createGain();
 
@@ -365,9 +369,8 @@ function testTopSpeaker() {
       // 1000Hz tone for earpiece - MAX volume
       oscillator.frequency.value = 1000;
       oscillator.type = "sine";
-      // Ramp up volume smoothly
-      gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-      gainNode.gain.linearRampToValueAtTime(1.0, audioContext.currentTime + 0.1);
+      // Start at max volume immediately
+      gainNode.gain.setValueAtTime(1.0, audioContext.currentTime);
 
       oscillator.start(audioContext.currentTime);
 
@@ -380,7 +383,11 @@ function testTopSpeaker() {
         visual.style.background = "var(--success-color)";
       }
       
-      alert('Zvuk sa prehráva! Ak nepočuješ nič, ZVÝŠ HLASITOSŤ tlačidlami na boku telefónu!');
+      // Show playing status without alert (alert breaks iOS audio!)
+      const statusDiv = document.getElementById('top-speaker-status');
+      if (statusDiv) {
+        statusDiv.innerHTML = '<strong style="color: var(--success-color);">▶ PREHRÁVA SA - Prilož k uchu!</strong><br><small>Zvýš hlasitosť tlačidlami na boku!</small>';
+      }
     } catch (error) {
       alert("Chyba prehrávania: " + error.message);
     }
@@ -485,6 +492,10 @@ function testBottomSpeaker() {
         ⏹ Zastaviť
       </button>
       
+      <div id="bottom-speaker-status" style="margin: 20px 0; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 8px; font-size: 1.1rem;">
+        Stlač tlačidlo ▶ Prehrať zvuk
+      </div>
+      
       <div style="margin-top: 30px;">
         <p style="margin: 10px 0;">Počuješ hlasný, čistý zvuk?</p>
         <button onclick="completeBottomSpeakerTest(true)" 
@@ -520,15 +531,15 @@ function testBottomSpeaker() {
     try {
       // Stop any existing audio first
       window.stopBottomSpeaker();
-      
+
       const AudioContext = window.AudioContext || window.webkitAudioContext;
       audioContext = new AudioContext();
-      
+
       // Resume audio context (iOS requirement)
-      if (audioContext.state === 'suspended') {
+      if (audioContext.state === "suspended") {
         await audioContext.resume();
       }
-      
+
       oscillator = audioContext.createOscillator();
       gainNode = audioContext.createGain();
 
@@ -537,9 +548,8 @@ function testBottomSpeaker() {
 
       oscillator.frequency.value = currentFreq;
       oscillator.type = "sine";
-      // Ramp up volume smoothly to max
-      gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-      gainNode.gain.linearRampToValueAtTime(1.0, audioContext.currentTime + 0.1);
+      // Start at max volume immediately
+      gainNode.gain.setValueAtTime(1.0, audioContext.currentTime);
 
       oscillator.start(audioContext.currentTime);
 
@@ -553,7 +563,11 @@ function testBottomSpeaker() {
         visual.innerHTML = "🔊";
       }
       
-      alert('Zvuk sa prehráva! Ak nepočuješ nič, ZVÝŠ HLASITOSŤ tlačidlami na boku telefónu!');
+      // Show playing status without alert (alert breaks iOS audio!)
+      const statusDiv = document.getElementById('bottom-speaker-status');
+      if (statusDiv) {
+        statusDiv.innerHTML = `<strong style="color: var(--success-color);">▶ PREHRÁVA SA ${currentFreq}Hz</strong><br><small>Zvýš hlasitosť tlačidlami na boku!</small>`;
+      }
     } catch (error) {
       alert("Chyba prehrávania: " + error.message);
     }
@@ -690,35 +704,35 @@ function testMicrophone() {
 
   window.startRecording = () => {
     navigator.mediaDevices
-      .getUserMedia({ 
+      .getUserMedia({
         audio: {
           echoCancellation: false,
           noiseSuppression: false,
-          autoGainControl: false
-        } 
+          autoGainControl: false,
+        },
       })
       .then((audioStream) => {
         stream = audioStream;
-        
+
         // Use audio/mp4 for better iOS compatibility
-        const options = { mimeType: 'audio/webm' };
-        
+        const options = { mimeType: "audio/webm" };
+
         // Try different formats for iOS compatibility
-        if (MediaRecorder.isTypeSupported('audio/mp4')) {
-          options.mimeType = 'audio/mp4';
-        } else if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
-          options.mimeType = 'audio/webm;codecs=opus';
-        } else if (MediaRecorder.isTypeSupported('audio/ogg;codecs=opus')) {
-          options.mimeType = 'audio/ogg;codecs=opus';
+        if (MediaRecorder.isTypeSupported("audio/mp4")) {
+          options.mimeType = "audio/mp4";
+        } else if (MediaRecorder.isTypeSupported("audio/webm;codecs=opus")) {
+          options.mimeType = "audio/webm;codecs=opus";
+        } else if (MediaRecorder.isTypeSupported("audio/ogg;codecs=opus")) {
+          options.mimeType = "audio/ogg;codecs=opus";
         }
-        
+
         try {
           mediaRecorder = new MediaRecorder(stream, options);
-        } catch(e) {
+        } catch (e) {
           // Fallback without options
           mediaRecorder = new MediaRecorder(stream);
         }
-        
+
         audioChunks = [];
 
         // Setup audio analysis for waveform
@@ -739,8 +753,8 @@ function testMicrophone() {
 
         mediaRecorder.onstop = () => {
           // Determine the correct MIME type
-          let mimeType = mediaRecorder.mimeType || 'audio/webm';
-          
+          let mimeType = mediaRecorder.mimeType || "audio/webm";
+
           const blob = new Blob(audioChunks, { type: mimeType });
           const audioURL = URL.createObjectURL(blob);
 
@@ -748,11 +762,11 @@ function testMicrophone() {
           if (audioElement) {
             audioElement.src = audioURL;
             audioElement.load(); // Force reload
-            
+
             // Show success message
-            alert('Nahrávka dokončená! Klikni na PLAY tlačidlo pre prehratie.');
+            alert("Nahrávka dokončená! Klikni na PLAY tlačidlo pre prehratie.");
           }
-          
+
           document.getElementById("playback-area").style.display = "block";
           document.getElementById("recording-controls").style.display = "none";
 
@@ -775,8 +789,8 @@ function testMicrophone() {
         };
 
         mediaRecorder.onerror = (event) => {
-          console.error('MediaRecorder error:', event.error);
-          alert('Chyba nahrávaniа: ' + event.error);
+          console.error("MediaRecorder error:", event.error);
+          alert("Chyba nahrávaniа: " + event.error);
         };
 
         // Start recording with timeslice for better compatibility
@@ -799,7 +813,7 @@ function testMicrophone() {
           if (timerEl) {
             timerEl.textContent = `${minutes}:${seconds}`;
           }
-          
+
           // Auto-stop after 10 seconds
           if (recordingTime >= 10) {
             window.stopRecording();
@@ -816,7 +830,11 @@ function testMicrophone() {
         `;
       })
       .catch((error) => {
-        alert("Chyba prístupu k mikrofónu: " + error.message + "\n\nUisti sa, že si povolil prístup k mikrofónu v nastaveniach Safari.");
+        alert(
+          "Chyba prístupu k mikrofónu: " +
+            error.message +
+            "\n\nUisti sa, že si povolil prístup k mikrofónu v nastaveniach Safari."
+        );
         closeModal();
       });
   };

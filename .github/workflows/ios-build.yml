@@ -51,14 +51,17 @@ jobs:
     - name: Find build artifacts
       run: |
         echo "Build output location:"
+        echo "DerivedData structure:"
+        find ./DerivedData -type d -maxdepth 4 || echo "No DerivedData found"
+        echo ""
+        echo "Searching for .app bundles:"
         find ./DerivedData -name "*.app" -type d || echo "No .app bundles found"
-        ls -la ./DerivedData/Build/Products/ || echo "Products directory not found"
     
     - name: Create IPA for sideloading
       if: success()
       run: |
-        # Find the .app bundle
-        APP_PATH=$(find ./DerivedData/Build/Products -name "*.app" -type d | head -n 1)
+        # Find the .app bundle (search entire DerivedData tree)
+        APP_PATH=$(find ./DerivedData -name "*.app" -type d | head -n 1)
         
         if [ -n "$APP_PATH" ]; then
           echo "Found app at: $APP_PATH"

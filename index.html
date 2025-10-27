@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="sk">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>iPhone Test Suite</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>📱 iPhone Test Suite</h1>
+            <p class="subtitle">Kompletné testovanie funkcií</p>
+        </header>
+
+        <main>
+            <!-- Visual Control Tests -->
+            <section class="test-category">
+                <h2>🔍 Vizuálna kontrola</h2>
+
+                <div class="test-card" data-test="lcd">
+                    <h3>LCD Test - Skvrny/Pixely</h3>
+                    <p>Otestuj displej na mŕtve pixely a škvrny</p>
+                    <button onclick="startLCDTest()">Spustiť LCD Test</button>
+                </div>
+
+                <div class="test-card" data-test="corners">
+                    <h3>Test rohov displeja</h3>
+                    <p>Skontroluj správne usadenie displeja</p>
+                    <button onclick="startCornerTest()">Test rohov</button>
+                </div>
+
+                <div class="test-card" data-test="spots">
+                    <h3>Test škrtov na mieste</h3>
+                    <p>Vizuálna kontrola poškodenia</p>
+                    <button onclick="startSpotTest()">Test škrtov</button>
+                </div>
+            </section>
+
+            <!-- Display & Touch Tests -->
+            <section class="test-category">
+                <h2>📱 Displej & Dotyk</h2>
+
+                <div class="test-card" data-test="touch">
+                    <h3>Multi-Touch Test</h3>
+                    <p>Testuj celú plochu dotykovej vrstvy</p>
+                    <button onclick="startTouchTest()">Test Multi-Touch</button>
+                </div>
+
+                <div class="test-card" data-test="3dtouch">
+                    <h3>3D Touch / Haptic Touch</h3>
+                    <p>Otestuj citlivosť na tlak</p>
+                    <button onclick="start3DTouchTest()">Test 3D Touch</button>
+                </div>
+
+                <div class="test-card" data-test="trueone">
+                    <h3>TrueTone & NightShift</h3>
+                    <p>Skontroluj displej technológie</p>
+                    <button onclick="checkDisplayFeatures()">Skontrolovať</button>
+                </div>
+            </section>
+
+            <!-- Audio Tests -->
+            <section class="test-category">
+                <h2>🔊 Zvuk</h2>
+
+                <div class="test-card" data-test="speaker-top">
+                    <h3>Horný reproduktor</h3>
+                    <p>Test hovoru/stereo</p>
+                    <button onclick="testTopSpeaker()">Test horného</button>
+                </div>
+
+                <div class="test-card" data-test="speaker-bottom">
+                    <h3>Dolný reproduktor</h3>
+                    <p>Test hlasitosti a kvality</p>
+                    <button onclick="testBottomSpeaker()">Test dolného</button>
+                </div>
+
+                <div class="test-card" data-test="microphone">
+                    <h3>Mikrofón</h3>
+                    <p>Nahraj a prehraj zvuk</p>
+                    <button onclick="testMicrophone()">Test mikrofónu</button>
+                </div>
+            </section>
+
+            <!-- Camera Tests -->
+            <section class="test-category">
+                <h2>📷 Kamery</h2>
+
+                <div class="test-card" data-test="camera-rear">
+                    <h3>Zadná kamera</h3>
+                    <p>Ostrenie, zoom, blesk</p>
+                    <button onclick="testRearCamera()">Test zadnej kamery</button>
+                </div>
+
+                <div class="test-card" data-test="camera-front">
+                    <h3>Predná kamera</h3>
+                    <p>FaceTime test</p>
+                    <button onclick="testFrontCamera()">Test prednej kamery</button>
+                </div>
+            </section>
+
+            <!-- Sensors Tests -->
+            <section class="test-category">
+                <h2>🎯 Senzory</h2>
+
+                <div class="test-card" data-test="proximity">
+                    <h3>Proximity senzor</h3>
+                    <p>Senzor pri hovore</p>
+                    <button onclick="testProximity()">Test proximity</button>
+                    <div class="sensor-status" id="proximity-status"></div>
+                </div>
+
+                <div class="test-card" data-test="faceid">
+                    <h3>FaceID / TouchID</h3>
+                    <p>Test biometrie</p>
+                    <button onclick="testBiometric()">Test biometrie</button>
+                    <div class="sensor-status" id="biometric-status"></div>
+                </div>
+
+                <div class="test-card" data-test="gyroscope">
+                    <h3>Gyroskop & Otáčanie</h3>
+                    <p>Test orientácie displeja</p>
+                    <button onclick="testGyroscope()">Test gyroskopu</button>
+                    <div class="sensor-status" id="gyro-status"></div>
+                </div>
+
+                <div class="test-card" data-test="accelerometer">
+                    <h3>Akcelerometer</h3>
+                    <p>Test pohybového senzora</p>
+                    <button onclick="testAccelerometer()">Test akcelerometra</button>
+                    <div class="sensor-status" id="accel-status"></div>
+                </div>
+            </section>
+
+            <!-- Connectivity Tests -->
+            <section class="test-category">
+                <h2>🌐 Konektivita</h2>
+
+                <div class="test-card" data-test="wifi">
+                    <h3>WiFi</h3>
+                    <p>Skontroluj WiFi pripojenie</p>
+                    <button onclick="testWiFi()">Test WiFi</button>
+                    <div class="sensor-status" id="wifi-status"></div>
+                </div>
+
+                <div class="test-card" data-test="bluetooth">
+                    <h3>Bluetooth</h3>
+                    <p>Skontroluj Bluetooth</p>
+                    <button onclick="testBluetooth()">Test Bluetooth</button>
+                    <div class="sensor-status" id="bluetooth-status"></div>
+                </div>
+
+                <div class="test-card" data-test="gps">
+                    <h3>GPS</h3>
+                    <p>Test polohy</p>
+                    <button onclick="testGPS()">Test GPS</button>
+                    <div class="sensor-status" id="gps-status"></div>
+                </div>
+
+                <div class="test-card" data-test="nfc">
+                    <h3>NFC / Apple Pay</h3>
+                    <p>Skontroluj NFC čip</p>
+                    <button onclick="testNFC()">Test NFC</button>
+                    <div class="sensor-status" id="nfc-status"></div>
+                </div>
+
+                <div class="test-card" data-test="cellular">
+                    <h3>SIM karta</h3>
+                    <p>Hovor, SMS, dáta</p>
+                    <button onclick="testCellular()">Test SIM</button>
+                    <div class="sensor-status" id="cellular-status"></div>
+                </div>
+            </section>
+
+            <!-- Battery & Charging Tests -->
+            <section class="test-category">
+                <h2>🔋 Batéria & Nabíjanie</h2>
+
+                <div class="test-card" data-test="battery">
+                    <h3>Battery Health</h3>
+                    <p>Stav batérie</p>
+                    <button onclick="checkBattery()">Skontrolovať batériu</button>
+                    <div class="sensor-status" id="battery-status"></div>
+                </div>
+
+                <div class="test-card" data-test="charging-cable">
+                    <h3>Káblové nabíjanie</h3>
+                    <p>Test Lightning/USB-C</p>
+                    <button onclick="testCableCharging()">Test nabíjania</button>
+                    <div class="sensor-status" id="charging-status"></div>
+                </div>
+
+                <div class="test-card" data-test="charging-wireless">
+                    <h3>Bezdrôtové nabíjanie</h3>
+                    <p>Ak podporuje</p>
+                    <button onclick="testWirelessCharging()">Test wireless</button>
+                    <div class="sensor-status" id="wireless-status"></div>
+                </div>
+            </section>
+
+            <!-- Final Tests -->
+            <section class="test-category">
+                <h2>✅ Finálne testy</h2>
+
+                <div class="test-card" data-test="restart">
+                    <h3>Reštart zariadenia</h3>
+                    <p>Manuálny test reštartu</p>
+                    <button onclick="showRestartInstructions()">Inštrukcie</button>
+                </div>
+
+                <div class="test-card" data-test="calls">
+                    <h3>Test hovorov</h3>
+                    <p>Prichádzajúci/odchádzajúci</p>
+                    <button onclick="showCallInstructions()">Inštrukcie</button>
+                </div>
+
+                <div class="test-card" data-test="mobile-data">
+                    <h3>Test mobilných dát</h3>
+                    <p>Skontroluj dátové pripojenie</p>
+                    <button onclick="testMobileData()">Test dát</button>
+                </div>
+            </section>
+
+            <!-- Test Summary -->
+            <section class="test-summary">
+                <h2>📊 Prehľad testov</h2>
+                <div id="summary-content">
+                    <p>Spusti testy pre zobrazenie výsledkov</p>
+                </div>
+                <button onclick="resetAllTests()" class="reset-btn">Reset všetkých testov</button>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal for full screen tests -->
+    <div id="test-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

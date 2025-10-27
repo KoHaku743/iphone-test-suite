@@ -1,0 +1,434 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --primary-color: #007AFF;
+    --success-color: #34C759;
+    --warning-color: #FF9500;
+    --danger-color: #FF3B30;
+    --bg-color: #000000;
+    --card-bg: #1C1C1E;
+    --text-primary: #FFFFFF;
+    --text-secondary: #8E8E93;
+    --border-color: #38383A;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-primary);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 100%;
+    padding: 20px;
+    padding-bottom: 40px;
+}
+
+header {
+    text-align: center;
+    padding: 30px 0;
+    background: linear-gradient(135deg, var(--primary-color), #0051D5);
+    border-radius: 20px;
+    margin-bottom: 30px;
+    box-shadow: 0 10px 30px rgba(0, 122, 255, 0.3);
+}
+
+header h1 {
+    font-size: 2rem;
+    margin-bottom: 10px;
+    font-weight: 700;
+}
+
+.subtitle {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1rem;
+}
+
+.test-category {
+    margin-bottom: 40px;
+}
+
+.test-category h2 {
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+    padding-left: 10px;
+    border-left: 4px solid var(--primary-color);
+    font-weight: 600;
+}
+
+.test-card {
+    background: var(--card-bg);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 15px;
+    border: 1px solid var(--border-color);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.test-card:active {
+    transform: scale(0.98);
+}
+
+.test-card h3 {
+    font-size: 1.2rem;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.test-card p {
+    color: var(--text-secondary);
+    margin-bottom: 15px;
+    font-size: 0.95rem;
+}
+
+.test-card button {
+    width: 100%;
+    padding: 15px;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.test-card button:active {
+    transform: scale(0.97);
+    background: #0051D5;
+}
+
+.sensor-status {
+    margin-top: 15px;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    display: none;
+    font-weight: 500;
+}
+
+.sensor-status.show {
+    display: block;
+}
+
+.sensor-status.success {
+    background: rgba(52, 199, 89, 0.15);
+    color: var(--success-color);
+    border: 1px solid var(--success-color);
+}
+
+.sensor-status.error {
+    background: rgba(255, 59, 48, 0.15);
+    color: var(--danger-color);
+    border: 1px solid var(--danger-color);
+}
+
+.sensor-status.info {
+    background: rgba(0, 122, 255, 0.15);
+    color: var(--primary-color);
+    border: 1px solid var(--primary-color);
+}
+
+.sensor-status.warning {
+    background: rgba(255, 149, 0, 0.15);
+    color: var(--warning-color);
+    border: 1px solid var(--warning-color);
+}
+
+.test-summary {
+    background: var(--card-bg);
+    border-radius: 15px;
+    padding: 25px;
+    border: 1px solid var(--border-color);
+    margin-top: 30px;
+}
+
+.test-summary h2 {
+    margin-bottom: 20px;
+    font-size: 1.5rem;
+}
+
+#summary-content {
+    margin-bottom: 20px;
+    color: var(--text-secondary);
+}
+
+.reset-btn {
+    width: 100%;
+    padding: 15px;
+    background: var(--danger-color);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.reset-btn:active {
+    background: #CC0000;
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.95);
+}
+
+.modal.show {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background-color: var(--card-bg);
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: auto;
+}
+
+.close-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    color: white;
+    font-size: 40px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 1001;
+    background: rgba(0, 0, 0, 0.5);
+    width: 50px;
+    height: 50px;
+    border-radius: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+.close-btn:active {
+    background: rgba(0, 0, 0, 0.7);
+}
+
+#modal-body {
+    padding: 20px;
+    width: 100%;
+    height: 100%;
+}
+
+/* LCD Test Screens */
+.lcd-test-screen {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.lcd-controls {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 15px;
+    z-index: 100;
+}
+
+.lcd-controls button {
+    padding: 15px 25px;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 2px solid white;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+}
+
+/* Touch Test Canvas */
+#touch-canvas {
+    width: 100%;
+    height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    touch-action: none;
+}
+
+.touch-instructions {
+    position: fixed;
+    top: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    padding: 15px 25px;
+    border-radius: 12px;
+    text-align: center;
+    color: white;
+    font-size: 0.9rem;
+    z-index: 10;
+}
+
+/* Camera View */
+#camera-view {
+    width: 100%;
+    height: 100vh;
+    object-fit: cover;
+    background: black;
+}
+
+.camera-controls {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 20px;
+    z-index: 100;
+}
+
+.camera-controls button {
+    width: 60px;
+    height: 60px;
+    border-radius: 30px;
+    background: white;
+    border: 3px solid rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    font-size: 1.5rem;
+}
+
+/* Audio Recorder */
+.audio-recorder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    padding: 40px;
+}
+
+.record-btn {
+    width: 80px;
+    height: 80px;
+    border-radius: 40px;
+    background: var(--danger-color);
+    border: none;
+    color: white;
+    font-size: 2rem;
+    cursor: pointer;
+    box-shadow: 0 5px 15px rgba(255, 59, 48, 0.3);
+}
+
+.record-btn.recording {
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 5px 15px rgba(255, 59, 48, 0.3);
+    }
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 8px 25px rgba(255, 59, 48, 0.5);
+    }
+}
+
+/* Gyroscope Test */
+.gyro-test {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    gap: 20px;
+}
+
+.gyro-ball {
+    width: 60px;
+    height: 60px;
+    background: var(--primary-color);
+    border-radius: 30px;
+    position: relative;
+    transition: transform 0.1s;
+    box-shadow: 0 5px 20px rgba(0, 122, 255, 0.5);
+}
+
+.gyro-data {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 400px;
+}
+
+.gyro-data-item {
+    display: flex;
+    justify-content: space-between;
+    margin: 10px 0;
+    font-family: 'Courier New', monospace;
+}
+
+/* Responsive */
+@media (min-width: 768px) {
+    .container {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+}
+
+/* Dark mode adjustments for better visibility */
+@media (prefers-color-scheme: light) {
+    :root {
+        --bg-color: #F2F2F7;
+        --card-bg: #FFFFFF;
+        --text-primary: #000000;
+        --text-secondary: #6E6E73;
+        --border-color: #D1D1D6;
+    }
+}
+
+/* Haptic feedback simulation */
+.haptic-feedback {
+    animation: haptic 0.1s ease-in-out;
+}
+
+@keyframes haptic {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-2px); }
+    75% { transform: translateX(2px); }
+}
+
+/* Success checkmark animation */
+.success-mark {
+    display: inline-block;
+    animation: checkmark 0.5s ease-in-out;
+}
+
+@keyframes checkmark {
+    0% { transform: scale(0) rotate(45deg); }
+    50% { transform: scale(1.2) rotate(45deg); }
+    100% { transform: scale(1) rotate(45deg); }
+}

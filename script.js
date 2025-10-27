@@ -407,7 +407,11 @@ function testTopSpeaker() {
           '<strong style="color: var(--success-color);">▶ PREHRÁVA SA - Prilož k uchu!</strong><br><small>Zvýš hlasitosť tlačidlami na boku!</small>';
       }
 
-      console.log("Top speaker audio started successfully", "Context state:", audioContext.state);
+      console.log(
+        "Top speaker audio started successfully",
+        "Context state:",
+        audioContext.state
+      );
     } catch (error) {
       console.error("Top speaker error:", error);
       const statusDiv = document.getElementById("top-speaker-status");
@@ -627,7 +631,11 @@ function testBottomSpeaker() {
         statusDiv.innerHTML = `<strong style="color: var(--success-color);">▶ PREHRÁVA SA ${currentFreq}Hz</strong><br><small>Zvýš hlasitosť tlačidlami na boku!</small>`;
       }
 
-      console.log("Bottom speaker audio started successfully", "Context state:", audioContext.state);
+      console.log(
+        "Bottom speaker audio started successfully",
+        "Context state:",
+        audioContext.state
+      );
     } catch (error) {
       console.error("Bottom speaker error:", error);
       const statusDiv = document.getElementById("bottom-speaker-status");
@@ -1025,73 +1033,254 @@ function testCamera(facingMode, testName, title) {
 
 // Sensor Tests
 function testProximity() {
-  // Note: Proximity Sensor API is not supported in Safari/iOS
-  // We use ambient light sensor changes as indirect detection or manual testing
+  // Creative workaround: Use front camera + brightness detection
+  const content = `
+    <div style="padding: 40px; text-align: center;">
+      <h2>🔍 Proximity Sensor Test</h2>
+      <p style="margin: 20px 0; font-size: 1.1rem;">
+        Tento test použije prednú kameru na detekciu priblíženia
+      </p>
+      
+      <video id="proximity-video" autoplay playsinline style="width: 200px; height: 200px; border-radius: 15px; object-fit: cover; margin: 20px auto; display: block;"></video>
+      
+      <div id="proximity-indicator" style="width: 150px; height: 150px; background: var(--primary-color); border-radius: 50%; margin: 30px auto; display: flex; align-items: center; justify-content: center; font-size: 3rem; transition: all 0.3s;">
+        👋
+      </div>
+      
+      <div id="proximity-reading" style="font-size: 1.5rem; font-weight: bold; margin: 20px 0; color: var(--primary-color);">
+        Jas: <span id="brightness-value">-</span>
+      </div>
+      
+      <div id="proximity-instructions" style="background: var(--card-bg); padding: 20px; border-radius: 12px; margin: 20px 0;">
+        <p style="margin: 10px 0;"><strong>Inštrukcie:</strong></p>
+        <ol style="text-align: left; line-height: 2;">
+          <li>Klikni "Spustiť test" a povoľ kameru</li>
+          <li>Zakry hornú časť displeja rukou (kde je kamera)</li>
+          <li>Keď zisťujem tmu, indikátor sčervenie</li>
+          <li>Odlož ruku - indikátor zezelenie</li>
+        </ol>
+      </div>
+      
+      <div id="proximity-status-text" style="padding: 15px; margin: 20px 0; border-radius: 8px; background: rgba(255,255,255,0.1); font-size: 1.1rem; font-weight: bold;">
+        Pripravený na test
+      </div>
+      
+      <button onclick="startProximityCamera()" id="start-proximity-btn"
+              style="margin: 10px; padding: 20px 40px; background: var(--success-color); 
+                     border: none; border-radius: 12px; color: white; font-size: 1.1rem; font-weight: 600;">
+        ▶ Spustiť test
+      </button>
+      
+      <div style="margin-top: 30px; display: none;" id="proximity-result-buttons">
+        <p style="margin: 10px 0;">Fungovala detekcia priblíženia?</p>
+        <button onclick="completeProximityTest(true)" 
+                style="margin: 10px; padding: 15px 30px; background: var(--success-color); 
+                       border: none; border-radius: 12px; color: white; font-size: 1rem;">
+          ✓ Áno, fungovalo to
+        </button>
+        <button onclick="completeProximityTest(false)" 
+                style="margin: 10px; padding: 15px 30px; background: var(--danger-color); 
+                       border: none; border-radius: 12px; color: white; font-size: 1rem;">
+          ✗ Nefungovalo
+        </button>
+        <button onclick="skipToManualTest()" 
+                style="margin: 10px; padding: 15px 30px; background: var(--warning-color); 
+                       border: none; border-radius: 12px; color: white; font-size: 1rem;">
+          🔄 Manuálny test (hovor)
+        </button>
+      </div>
+    </div>
+  `;
 
-  showStatus(
-    "proximity-status",
-    "Safari nepodporuje Proximity Sensor API.\nSpustím alternatívny test...",
-    "info"
-  );
+  openModal(content);
 
-  // Try using ambient light sensor as indirect proximity detection
-  if ("AmbientLightSensor" in window) {
+  let stream = null;
+  let detectionInterval = null;
+  let proximityDetected = false;
+
+  window.startProximityCamera = async () => {
     try {
-      const sensor = new AmbientLightSensor();
-      let readings = [];
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "user" },
+        audio: false
+      });
 
-      sensor.addEventListener("reading", () => {
-        readings.push(sensor.illuminance);
-        if (readings.length > 3) {
-          // Check for sudden darkness (proximity)
-          const recent = readings.slice(-3);
-          const avg = recent.reduce((a, b) => a + b) / recent.length;
-          if (avg < 1) {
-            showStatus(
-              "proximity-status",
-              `✓ Možná proximity detekcia - Tma: ${avg.toFixed(2)} lux`,
-              "success"
-            );
-          } else {
-            showStatus(
-              "proximity-status",
-              `Svetlo: ${avg.toFixed(2)} lux - Zakry senzor`,
-              "info"
-            );
+      const video = document.getElementById("proximity-video");
+      video.srcObject = stream;
+
+      document.getElementById("start-proximity-btn").style.display = "none";
+      document.getElementById("proximity-result-buttons").style.display = "block";
+
+      // Create canvas for brightness analysis
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      canvas.width = 320;
+      canvas.height = 240;
+
+      let lowBrightnessCount = 0;
+      let highBrightnessCount = 0;
+
+      detectionInterval = setInterval(() => {
+        if (video.readyState === video.HAVE_ENOUGH_DATA) {
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const data = imageData.data;
+
+          // Calculate average brightness
+          let totalBrightness = 0;
+          for (let i = 0; i < data.length; i += 4) {
+            const r = data[i];
+            const g = data[i + 1];
+            const b = data[i + 2];
+            totalBrightness += (r + g + b) / 3;
+          }
+          const avgBrightness = totalBrightness / (data.length / 4);
+
+          const brightnessValue = document.getElementById("brightness-value");
+          const indicator = document.getElementById("proximity-indicator");
+          const statusText = document.getElementById("proximity-status-text");
+
+          if (brightnessValue) {
+            brightnessValue.textContent = avgBrightness.toFixed(0);
+          }
+
+          // Proximity detected when brightness is very low
+          if (avgBrightness < 30) {
+            lowBrightnessCount++;
+            if (lowBrightnessCount > 2) {
+              proximityDetected = true;
+              if (indicator) {
+                indicator.style.background = "var(--danger-color)";
+                indicator.innerHTML = "🚫";
+                indicator.style.transform = "scale(1.3)";
+              }
+              if (statusText) {
+                statusText.style.background = "var(--danger-color)";
+                statusText.textContent = "⚠️ PROXIMITY DETECTED - Objekt blízko!";
+              }
+              highBrightnessCount = 0;
+            }
+          } else if (avgBrightness > 50) {
+            highBrightnessCount++;
+            if (highBrightnessCount > 2 && proximityDetected) {
+              if (indicator) {
+                indicator.style.background = "var(--success-color)";
+                indicator.innerHTML = "✅";
+                indicator.style.transform = "scale(1.1)";
+              }
+              if (statusText) {
+                statusText.style.background = "var(--success-color)";
+                statusText.textContent = "✓ Objekt sa vzdialil - detekcia funguje!";
+              }
+              lowBrightnessCount = 0;
+            } else if (!proximityDetected) {
+              if (indicator) {
+                indicator.style.background = "var(--primary-color)";
+                indicator.innerHTML = "👋";
+                indicator.style.transform = "scale(1)";
+              }
+              if (statusText) {
+                statusText.style.background = "rgba(255,255,255,0.1)";
+                statusText.textContent = "Zakry kameru rukou...";
+              }
+            }
           }
         }
-      });
+      }, 200);
 
-      sensor.addEventListener("error", (error) => {
-        showStatus(
-          "proximity-status",
-          `Chyba senzora: ${error.message}`,
-          "error"
-        );
-        manualProximityTest();
-      });
-
-      sensor.start();
-
-      alert(
-        "Zakry horný okraj displeja (kde je slúchadlo) rukou na 2 sekundy."
-      );
-
-      setTimeout(() => {
-        sensor.stop();
-        const passed = confirm(
-          "Fungoval test proximity senzora? (Videl si zmenu svetla?)"
-        );
-        updateTestResult("proximity", passed);
-      }, 5000);
     } catch (error) {
-      showStatus("proximity-status", `Chyba: ${error.message}`, "error");
-      manualProximityTest();
+      alert("Chyba prístupu ku kamere: " + error.message + "\n\nPrejdeme na manuálny test.");
+      skipToManualTest();
     }
-  } else {
-    // Direct manual test - most reliable for iOS
-    manualProximityTest();
-  }
+  };
+
+  window.completeProximityTest = (passed) => {
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+    }
+    if (detectionInterval) {
+      clearInterval(detectionInterval);
+    }
+    updateTestResult("proximity", passed);
+    closeModal();
+    showStatus(
+      "proximity-status",
+      passed ? "✓ Proximity test úspešný" : "✗ Proximity test neúspešný",
+      passed ? "success" : "error"
+    );
+  };
+
+  window.skipToManualTest = () => {
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+    }
+    if (detectionInterval) {
+      clearInterval(detectionInterval);
+    }
+    closeModal();
+    setTimeout(() => manualProximityTest(), 100);
+  };
+
+  // Cleanup on modal close
+  const originalClose = window.closeModal;
+  window.closeModal = function() {
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+    }
+    if (detectionInterval) {
+      clearInterval(detectionInterval);
+    }
+    originalClose();
+    window.closeModal = originalClose;
+  };
+}
+
+  function manualProximityTest() {
+    showStatus(
+      "proximity-status",
+      "⚠️ Proximity API nie je v Safari dostupné.\nSpustím manuálny test...",
+      "warning"
+    );
+
+    const content = `
+      <div style="padding: 40px; text-align: center;">
+        <h2>🔍 Proximity Sensor Test</h2>
+        <p style="margin: 20px 0; font-size: 1.1rem;">
+          Proximity senzor sa používa pri telefonovaní,<br>
+          aby sa vypol displej keď telefón priložíš k uchu.
+        </p>
+        
+        <div style="background: var(--card-bg); padding: 30px; border-radius: 15px; margin: 20px 0;">
+          <h3 style="color: var(--primary-color); margin-bottom: 15px;">Test:</h3>
+          <ol style="text-align: left; line-height: 2; font-size: 1rem;">
+            <li>Zavolaj na iný telefón (alebo sa nechaj zavolať)</li>
+            <li>Počas hovoru priloži iPhone k uchu</li>
+            <li>Displej by sa mal ZHASNÚŤ</li>
+            <li>Odlož telefón od ucha</li>
+            <li>Displej by sa mal ROZSVIETI</li>
+          </ol>
+        </div>
+        
+        <p style="margin: 20px 0; color: var(--warning-color);">
+          ⚡ Tip: Môžeš zavolať na vlastné číslo cez FaceTime
+        </p>
+        
+        <div style="margin-top: 30px;">
+          <button onclick="completeProximityTest(true)" 
+                  style="margin: 10px; padding: 20px 40px; background: var(--success-color); 
+                         border: none; border-radius: 12px; color: white; font-size: 1.1rem; font-weight: 600;">
+            ✓ Displej sa vypína/zapína správne
+          </button>
+          <button onclick="completeProximityTest(false)" 
+                  style="margin: 10px; padding: 20px 40px; background: var(--danger-color); 
+                         border: none; border-radius: 12px; color: white; font-size: 1.1rem; font-weight: 600;">
+            ✗ Displej nereaguje
+          </button>
+        </div>
+      </div>
+    `;
+
+    openModal(content);
 
   function manualProximityTest() {
     showStatus(

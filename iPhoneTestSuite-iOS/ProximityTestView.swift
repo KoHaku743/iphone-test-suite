@@ -258,9 +258,11 @@ class ProximityManager: ObservableObject {
     }
 }
 
+#if DEBUG
 #Preview {
     NavigationStack {
         ProximityTestView()
             .environmentObject(TestManager())
     }
 }
+#endif

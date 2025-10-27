@@ -266,7 +266,9 @@ struct TestCard: View {
     }
 }
 
+#if DEBUG
 #Preview {
     ContentView()
         .environmentObject(TestManager())
 }
+#endif

@@ -262,9 +262,11 @@ class AudioTestManager: ObservableObject {
     }
 }
 
+#if DEBUG
 #Preview {
     NavigationStack {
         SpeakerTestView(speakerType: .bottom)
             .environmentObject(TestManager())
     }
 }
+#endif

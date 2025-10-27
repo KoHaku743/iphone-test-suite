@@ -234,9 +234,11 @@ class MotionTestManager: ObservableObject {
     }
 }
 
+#if DEBUG
 #Preview {
     NavigationStack {
         GyroscopeTestView()
             .environmentObject(TestManager())
     }
 }
+#endif

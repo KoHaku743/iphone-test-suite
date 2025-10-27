@@ -401,14 +401,15 @@ jobs:
           2>&1 | tee build.log
       continue-on-error: true
       
-    - name: Show compilation errors
-      if: failure()
-      run: |
-        echo "=== COMPILATION ERRORS ==="
-        grep -A 5 "error:" build.log || echo "No specific errors found"
-        echo ""
-        echo "=== FULL BUILD LOG ==="
-        cat build.log
+		- name: Show compilation errors (summary)
+			if: failure()
+			run: |
+				echo "### ❌ Build failed" >> $GITHUB_STEP_SUMMARY
+				echo "" >> $GITHUB_STEP_SUMMARY
+				echo "Last 200 lines of build.log:" >> $GITHUB_STEP_SUMMARY
+				echo '```' >> $GITHUB_STEP_SUMMARY
+				tail -n 200 build.log >> $GITHUB_STEP_SUMMARY || echo "build.log missing" >> $GITHUB_STEP_SUMMARY
+				echo '```' >> $GITHUB_STEP_SUMMARY
           
     - name: Find build artifacts
       run: |
@@ -439,7 +440,7 @@ jobs:
           exit 1
         fi
           
-    - name: Upload build artifacts
+		- name: Upload build artifacts (success)
       uses: actions/upload-artifact@v4
       if: success()
       with:
@@ -449,6 +450,15 @@ jobs:
           build.log
         retention-days: 7
         if-no-files-found: warn
+
+		- name: Upload build log (on failure)
+			uses: actions/upload-artifact@v4
+			if: failure()
+			with:
+				name: build-log
+				path: build.log
+				retention-days: 7
+				if-no-files-found: warn
 
     - name: Build summary
       if: always()

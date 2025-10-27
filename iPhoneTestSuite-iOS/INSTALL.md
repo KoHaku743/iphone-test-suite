@@ -5,9 +5,11 @@ There are several ways to install the app on your iPhone without paying for an A
 ## Method 1: AltStore (Recommended - Free, 7 days)
 
 ### What is AltStore?
+
 AltStore lets you sideload apps using your free Apple ID. Apps last 7 days, then need to be re-signed.
 
 ### Requirements:
+
 - Windows or Mac computer
 - iPhone with iOS 14+
 - Free Apple ID
@@ -16,14 +18,17 @@ AltStore lets you sideload apps using your free Apple ID. Apps last 7 days, then
 ### Steps:
 
 1. **Download AltStore:**
+
    - Visit: https://altstore.io
    - Download for Mac or Windows
 
 2. **Install AltServer on your computer:**
+
    - Mac: Extract and move to Applications
    - Windows: Run the installer
 
 3. **Install AltStore on iPhone:**
+
    - Connect iPhone via USB
    - Open AltServer on computer
    - Click AltServer icon in menu bar/system tray
@@ -31,10 +36,12 @@ AltStore lets you sideload apps using your free Apple ID. Apps last 7 days, then
    - Enter your Apple ID (stays on your device only)
 
 4. **Trust AltStore on iPhone:**
+
    - Go to Settings → General → VPN & Device Management
    - Tap your Apple ID → Trust
 
 5. **Install the IPA:**
+
    - Download the `.ipa` file from GitHub Actions
    - Open AltStore on iPhone
    - Tap "+" icon
@@ -52,12 +59,14 @@ AltStore lets you sideload apps using your free Apple ID. Apps last 7 days, then
 ### Steps:
 
 1. **Download Sideloadly:**
+
    - Visit: https://sideloadly.io
    - Download for Mac or Windows
 
 2. **Connect iPhone via USB**
 
 3. **Open Sideloadly:**
+
    - Drag the `.ipa` file into Sideloadly
    - Enter your Apple ID
    - Click "Start"
@@ -71,18 +80,21 @@ AltStore lets you sideload apps using your free Apple ID. Apps last 7 days, then
 ## Method 3: Xcode (Best for Development)
 
 ### Requirements:
+
 - Mac with Xcode 15+
 - Free Apple ID
 
 ### Steps:
 
 1. **Open the project in Xcode:**
+
    ```bash
    cd "iPhone website/iPhoneTestSuite-iOS"
    open iPhoneTestSuite.xcodeproj
    ```
 
 2. **Set up signing:**
+
    - Select project in Xcode
    - Select target "iPhoneTestSuite"
    - Go to "Signing & Capabilities"
@@ -91,14 +103,17 @@ AltStore lets you sideload apps using your free Apple ID. Apps last 7 days, then
    - Xcode will create a free provisioning profile
 
 3. **Connect iPhone via USB:**
+
    - Unlock iPhone
    - Trust the computer if prompted
 
 4. **Select your iPhone as target:**
+
    - In Xcode toolbar, click device dropdown
    - Select your iPhone
 
 5. **Build and Run:**
+
    - Press ⌘R or click the Play button
    - App installs and launches on your iPhone
 
@@ -115,10 +130,12 @@ AltStore lets you sideload apps using your free Apple ID. Apps last 7 days, then
 If you have an Apple Developer account ($99/year):
 
 1. **Archive the app in Xcode:**
+
    - Product → Archive
    - Upload to App Store Connect
 
 2. **Add TestFlight testers:**
+
    - App Store Connect → TestFlight
    - Add internal or external testers
 
@@ -131,12 +148,12 @@ If you have an Apple Developer account ($99/year):
 
 ## Comparison:
 
-| Method | Cost | Duration | Requires Computer | Best For |
-|--------|------|----------|-------------------|----------|
-| **AltStore** | Free | 7 days (auto-refresh) | Initial + Refresh | Regular users |
-| **Sideloadly** | Free | 7 days (manual refresh) | Every refresh | Quick testing |
-| **Xcode** | Free | 7 days | Every install | Developers |
-| **TestFlight** | $99/year | 90 days | No | Distribution |
+| Method         | Cost     | Duration                | Requires Computer | Best For      |
+| -------------- | -------- | ----------------------- | ----------------- | ------------- |
+| **AltStore**   | Free     | 7 days (auto-refresh)   | Initial + Refresh | Regular users |
+| **Sideloadly** | Free     | 7 days (manual refresh) | Every refresh     | Quick testing |
+| **Xcode**      | Free     | 7 days                  | Every install     | Developers    |
+| **TestFlight** | $99/year | 90 days                 | No                | Distribution  |
 
 ---
 
@@ -156,18 +173,22 @@ Once the GitHub Actions workflow completes:
 ## Troubleshooting:
 
 ### "Untrusted Developer"
+
 - Go to Settings → General → VPN & Device Management
 - Tap your developer profile → Trust
 
 ### "Unable to Install"
+
 - Make sure you're using the same Apple ID that signed the app
 - Check that your device is added to the provisioning profile
 
 ### App Crashes on Launch
+
 - Check that all permissions are granted in Settings → Privacy
 - Reinstall the app
 
 ### 7-Day Expiration
+
 - With AltStore: Just open the app while on same WiFi (auto-refreshes)
 - With Sideloadly/Xcode: Reinstall the app
 

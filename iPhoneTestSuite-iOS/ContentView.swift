@@ -6,30 +6,31 @@ struct ContentView: View {
     
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(spacing: 20) {
-                    // Header
-                    VStack(spacing: 8) {
-                        Image(systemName: "iphone.gen3")
-                            .font(.system(size: 60))
-                            .foregroundStyle(.blue)
+            GeometryReader { geometry in
+                ScrollView {
+                    VStack(spacing: 20) {
+                        // Header
+                        VStack(spacing: 8) {
+                            Image(systemName: "iphone.gen3")
+                                .font(.system(size: 60))
+                                .foregroundStyle(.blue)
+                            
+                            Text("iPhone Test Suite")
+                                .font(.largeTitle)
+                                .fontWeight(.bold)
+                            
+                            Text("Kompletné testovanie funkcií")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                        }
+                        .padding(.top, 20)
                         
-                        Text("iPhone Test Suite")
-                            .font(.largeTitle)
-                            .fontWeight(.bold)
+                        // Test Summary
+                        TestSummaryCard()
+                            .padding(.horizontal)
                         
-                        Text("Kompletné testovanie funkcií")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                    }
-                    .padding(.top, 20)
-                    
-                    // Test Summary
-                    TestSummaryCard()
-                        .padding(.horizontal)
-                    
-                    // Test Categories
-                    LazyVStack(spacing: 16) {
+                        // Test Categories
+                        LazyVStack(spacing: 16) {
                         TestCategorySection(
                             title: "🔍 Vizuálna kontrola",
                             tests: [
@@ -112,6 +113,7 @@ struct ContentView: View {
                     .padding(.horizontal)
                     .padding(.bottom, 30)
                 }
+                .frame(minWidth: geometry.size.width)
             }
             .navigationBarTitleDisplayMode(.inline)
         }

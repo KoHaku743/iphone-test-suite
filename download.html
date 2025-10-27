@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Install iPhone Test Suite Profile</title>
+  <style>
+    :root { --bg:#0b0c10; --card:#15171c; --text:#e8edf2; --muted:#9aa5b1; --accent:#2bb7f6; }
+    html,body { height:100%; }
+    body {
+      margin:0; font-family:-apple-system, BlinkMacSystemFont, "SF Pro Text", Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      background:linear-gradient(180deg, #0b0c10 0%, #0f1117 100%);
+      color:var(--text); display:flex; align-items:center; justify-content:center; padding:24px;
+    }
+    .card { width:100%; max-width:620px; background:var(--card); border-radius:16px; padding:24px; box-shadow:0 10px 30px rgba(0,0,0,0.3); }
+    h1 { margin:0 0 12px; font-size:24px; }
+    p { color:var(--muted); line-height:1.5; }
+    .btn {
+      display:inline-block; margin:16px 0; padding:14px 18px; border-radius:12px; text-decoration:none; color:#001018;
+      background:linear-gradient(135deg, #2bb7f6 0%, #79ffe1 100%); font-weight:600; box-shadow:0 8px 20px rgba(43,183,246,0.25);
+    }
+    .btn:active { transform:translateY(1px); }
+    .note { background:#0f131a; border:1px solid #1f2630; padding:12px 14px; border-radius:12px; font-size:14px; }
+    .steps { margin:16px 0; }
+    .steps li { margin:8px 0; }
+    .footer { margin-top:16px; font-size:12px; color:#8b95a1; }
+    code { background:#0f131a; border:1px solid #1f2630; padding:2px 6px; border-radius:6px; }
+  </style>
+  <script>
+    // Gentle nudge to use Safari on iPhone
+    document.addEventListener('DOMContentLoaded', () => {
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+      const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+      const warn = document.getElementById('env-warning');
+      if (!isIOS || !isSafari) warn.style.display = 'block';
+    });
+  </script>
+</head>
+<body>
+  <main class="card">
+    <h1>Install iPhone Test Suite (Web Clip)</h1>
+    <p>This installs a Home Screen icon that opens the iPhone Test Suite website for quick testing during repairs.</p>
+
+    <div id="env-warning" class="note" style="display:none;">
+      Tip: Open this page in Safari on an iPhone to install the configuration profile.
+    </div>
+
+    <a class="btn" href="profiles/webclip-iphone-test-suite.mobileconfig">Download Profile</a>
+
+    <div class="steps">
+      <p><strong>After tapping Download:</strong></p>
+      <ol>
+        <li>Tap Allow when Safari asks to download the profile.</li>
+        <li>Open Settings → Profile Downloaded → Install.</li>
+        <li>Confirm with your passcode, then Install again.</li>
+        <li>A Home Screen icon “iPhone Test Suite” will appear.</li>
+      </ol>
+    </div>
+
+    <div class="note">
+      If the button above doesn’t start install, try the direct file link:
+      <div style="margin-top:8px;">
+        <a href="https://raw.githubusercontent.com/KoHaku743/iphone-test-suite/ios-native-app/profiles/webclip-iphone-test-suite.mobileconfig" style="color:var(--accent);">Open raw profile</a>
+      </div>
+    </div>
+
+    <p class="footer">
+      Profile type: <code>com.apple.webClip.managed</code>. Content is unsigned and removable. For native sensor access (e.g., proximity), use the iOS app (see INSTALL.md).
+    </p>
+  </main>
+</body>
+</html>

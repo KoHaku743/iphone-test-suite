@@ -1,6 +1,5 @@
 # iPhone Test Suite
 
-
 - LCD test (pixely, škvrny)
 - Test rohov displeja
 
@@ -24,9 +23,11 @@
 ## Rýchla inštalácia pre technikov
 
 - Profil na stiahnutie (Home Screen ikona): `profiles/webclip-iphone-test-suite.mobileconfig`.
+- Jedným klepnutím v Safari: otvorte `download.html` a ťuknite na „Download Profile“.
 - Ďalšie možnosti distribúcie (TestFlight, Ad Hoc OTA, AltStore/Sideloadly): pozri `DISTRIBUTION.md`.
 
 Poznámka: Webová verzia nemá prístup k proximity senzoru (obmedzenie iOS). Pre plné hardvérové testy použite natívnu iOS aplikáciu v branche `ios-native-app` (návod v `INSTALL.md`).
+
 - SIM karta (hovory, SMS, dáta)
 
 ### 🔋 Batéria & Nabíjanie

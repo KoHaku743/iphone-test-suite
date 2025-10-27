@@ -285,43 +285,302 @@ function checkDisplayFeatures() {
 
 // Audio Tests
 function testTopSpeaker() {
-  const audio = new Audio();
-  audio.src =
-    "data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIGGa77OmfTRAMUKbj8LZjHQU3kdXyy3krBSJ3xu/ekEIKE161OepUFQlBnN7xwXUlBi6Dzv";
-
-  alert("Prehráva sa zvuk cez horný reproduktor (earpiece). Počuj ho?");
-  audio.play();
-
-  setTimeout(() => {
-    const passed = confirm("Funguje horný reproduktor?");
+  const content = `
+    <div style="padding: 40px; text-align: center;">
+      <h2>🔊 Horný reproduktor (Earpiece)</h2>
+      <p style="margin: 20px 0;">
+        Tento reproduktor sa používa pri telefonovaní.<br>
+        Priloži telefón k uchu ako pri hovore.
+      </p>
+      
+      <div id="top-speaker-visual" style="width: 150px; height: 150px; background: var(--primary-color); 
+           border-radius: 50%; margin: 30px auto; display: flex; align-items: center; 
+           justify-content: center; font-size: 3rem;">
+        🎵
+      </div>
+      
+      <div id="volume-bars" style="display: flex; gap: 5px; justify-content: center; margin: 20px 0; height: 60px; align-items: flex-end;">
+        ${Array.from({length: 10}, (_, i) => `
+          <div style="width: 20px; background: var(--primary-color); border-radius: 3px; 
+               transition: height 0.1s; height: ${(i + 1) * 10}%;" 
+               class="volume-bar"></div>
+        `).join('')}
+      </div>
+      
+      <button onclick="playTopSpeaker()" 
+              style="margin: 10px; padding: 20px 40px; background: var(--success-color); 
+                     border: none; border-radius: 12px; color: white; font-size: 1.1rem; font-weight: 600;">
+        ▶ Prehrať zvuk
+      </button>
+      <button onclick="stopTopSpeaker()" 
+              style="margin: 10px; padding: 20px 40px; background: var(--danger-color); 
+                     border: none; border-radius: 12px; color: white; font-size: 1.1rem; font-weight: 600;">
+        ⏹ Zastaviť
+      </button>
+      
+      <div style="margin-top: 30px;">
+        <p style="margin: 10px 0;">Počuješ zvuk cez horný reproduktor?</p>
+        <button onclick="completeTopSpeakerTest(true)" 
+                style="margin: 10px; padding: 15px 30px; background: var(--success-color); 
+                       border: none; border-radius: 12px; color: white; font-size: 1rem;">
+          ✓ Áno, počujem
+        </button>
+        <button onclick="completeTopSpeakerTest(false)" 
+                style="margin: 10px; padding: 15px 30px; background: var(--danger-color); 
+                       border: none; border-radius: 12px; color: white; font-size: 1rem;">
+          ✗ Nepočujem / Slabý zvuk
+        </button>
+      </div>
+    </div>
+  `;
+  
+  openModal(content);
+  
+  let audioContext = null;
+  let oscillator = null;
+  let gainNode = null;
+  
+  window.playTopSpeaker = () => {
+    try {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      audioContext = new AudioContext();
+      oscillator = audioContext.createOscillator();
+      gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      // 1000Hz tone for earpiece
+      oscillator.frequency.value = 1000;
+      oscillator.type = "sine";
+      gainNode.gain.value = 0.5;
+      
+      oscillator.start();
+      
+      // Animate volume bars
+      animateVolumeBars();
+      
+      const visual = document.getElementById('top-speaker-visual');
+      if (visual) {
+        visual.style.transform = 'scale(1.2)';
+        visual.style.background = 'var(--success-color)';
+      }
+    } catch (error) {
+      alert('Chyba prehrávania: ' + error.message);
+    }
+  };
+  
+  window.stopTopSpeaker = () => {
+    if (oscillator) {
+      oscillator.stop();
+      oscillator = null;
+    }
+    if (audioContext) {
+      audioContext.close();
+      audioContext = null;
+    }
+    const visual = document.getElementById('top-speaker-visual');
+    if (visual) {
+      visual.style.transform = 'scale(1)';
+      visual.style.background = 'var(--primary-color)';
+    }
+    stopVolumeBars();
+  };
+  
+  function animateVolumeBars() {
+    const bars = document.querySelectorAll('.volume-bar');
+    let interval = setInterval(() => {
+      if (!oscillator) {
+        clearInterval(interval);
+        return;
+      }
+      bars.forEach((bar, i) => {
+        const randomHeight = Math.random() * 100;
+        bar.style.height = randomHeight + '%';
+      });
+    }, 100);
+  }
+  
+  function stopVolumeBars() {
+    const bars = document.querySelectorAll('.volume-bar');
+    bars.forEach((bar, i) => {
+      bar.style.height = (i + 1) * 10 + '%';
+    });
+  }
+  
+  window.completeTopSpeakerTest = (passed) => {
+    window.stopTopSpeaker();
     updateTestResult("speaker-top", passed);
-    audio.pause();
-  }, 2000);
+    closeModal();
+  };
+  
+  // Auto cleanup on modal close
+  const originalClose = window.closeModal;
+  window.closeModal = function() {
+    window.stopTopSpeaker();
+    originalClose();
+    window.closeModal = originalClose;
+  };
 }
 
 function testBottomSpeaker() {
-  const audio = new Audio();
-  // Generate a test tone
-  const AudioContext = window.AudioContext || window.webkitAudioContext;
-  const audioContext = new AudioContext();
-  const oscillator = audioContext.createOscillator();
-  const gainNode = audioContext.createGain();
-
-  oscillator.connect(gainNode);
-  gainNode.connect(audioContext.destination);
-
-  oscillator.frequency.value = 440;
-  oscillator.type = "sine";
-  gainNode.gain.value = 0.3;
-
-  alert("Prehráva sa tón 440Hz cez dolný reproduktor. Počuj ho?");
-  oscillator.start();
-
-  setTimeout(() => {
-    oscillator.stop();
-    const passed = confirm("Funguje dolný reproduktor?");
+  const content = `
+    <div style="padding: 40px; text-align: center;">
+      <h2>🔊 Dolný reproduktor (Stereo)</h2>
+      <p style="margin: 20px 0;">
+        Tento reproduktor sa používa pre médiá a zvonenie.<br>
+        Zvýš hlasitosť na maximum!
+      </p>
+      
+      <div id="bottom-speaker-visual" style="width: 150px; height: 150px; background: var(--primary-color); 
+           border-radius: 50%; margin: 30px auto; display: flex; align-items: center; 
+           justify-content: center; font-size: 3rem;">
+        🔈
+      </div>
+      
+      <div id="volume-bars-bottom" style="display: flex; gap: 5px; justify-content: center; margin: 20px 0; height: 80px; align-items: flex-end;">
+        ${Array.from({length: 15}, (_, i) => `
+          <div style="width: 15px; background: var(--primary-color); border-radius: 3px; 
+               transition: height 0.1s; height: ${(i + 1) * 6}%;" 
+               class="volume-bar-bottom"></div>
+        `).join('')}
+      </div>
+      
+      <div style="margin: 20px 0;">
+        <label for="freq-slider" style="display: block; margin-bottom: 10px;">
+          Frekvencia: <span id="freq-value">440</span> Hz
+        </label>
+        <input type="range" id="freq-slider" min="200" max="2000" value="440" 
+               style="width: 80%; max-width: 400px;" 
+               onchange="updateFrequency(this.value)">
+      </div>
+      
+      <button onclick="playBottomSpeaker()" 
+              style="margin: 10px; padding: 20px 40px; background: var(--success-color); 
+                     border: none; border-radius: 12px; color: white; font-size: 1.1rem; font-weight: 600;">
+        ▶ Prehrať zvuk
+      </button>
+      <button onclick="stopBottomSpeaker()" 
+              style="margin: 10px; padding: 20px 40px; background: var(--danger-color); 
+                     border: none; border-radius: 12px; color: white; font-size: 1.1rem; font-weight: 600;">
+        ⏹ Zastaviť
+      </button>
+      
+      <div style="margin-top: 30px;">
+        <p style="margin: 10px 0;">Počuješ hlasný, čistý zvuk?</p>
+        <button onclick="completeBottomSpeakerTest(true)" 
+                style="margin: 10px; padding: 15px 30px; background: var(--success-color); 
+                       border: none; border-radius: 12px; color: white; font-size: 1rem;">
+          ✓ Áno, hlasný a čistý
+        </button>
+        <button onclick="completeBottomSpeakerTest(false)" 
+                style="margin: 10px; padding: 15px 30px; background: var(--danger-color); 
+                       border: none; border-radius: 12px; color: white; font-size: 1rem;">
+          ✗ Slabý / Praskanie / Ticho
+        </button>
+      </div>
+    </div>
+  `;
+  
+  openModal(content);
+  
+  let audioContext = null;
+  let oscillator = null;
+  let gainNode = null;
+  let currentFreq = 440;
+  
+  window.updateFrequency = (freq) => {
+    currentFreq = freq;
+    document.getElementById('freq-value').textContent = freq;
+    if (oscillator) {
+      oscillator.frequency.value = freq;
+    }
+  };
+  
+  window.playBottomSpeaker = () => {
+    try {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      audioContext = new AudioContext();
+      oscillator = audioContext.createOscillator();
+      gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      oscillator.frequency.value = currentFreq;
+      oscillator.type = "sine";
+      gainNode.gain.value = 0.7;
+      
+      oscillator.start();
+      
+      // Animate volume bars
+      animateVolumeBars();
+      
+      const visual = document.getElementById('bottom-speaker-visual');
+      if (visual) {
+        visual.style.transform = 'scale(1.2)';
+        visual.style.background = 'var(--success-color)';
+        visual.innerHTML = '🔊';
+      }
+    } catch (error) {
+      alert('Chyba prehrávania: ' + error.message);
+    }
+  };
+  
+  window.stopBottomSpeaker = () => {
+    if (oscillator) {
+      oscillator.stop();
+      oscillator = null;
+    }
+    if (audioContext) {
+      audioContext.close();
+      audioContext = null;
+    }
+    const visual = document.getElementById('bottom-speaker-visual');
+    if (visual) {
+      visual.style.transform = 'scale(1)';
+      visual.style.background = 'var(--primary-color)';
+      visual.innerHTML = '🔈';
+    }
+    stopVolumeBars();
+  };
+  
+  function animateVolumeBars() {
+    const bars = document.querySelectorAll('.volume-bar-bottom');
+    let interval = setInterval(() => {
+      if (!oscillator) {
+        clearInterval(interval);
+        return;
+      }
+      bars.forEach((bar, i) => {
+        const randomHeight = 20 + Math.random() * 80;
+        bar.style.height = randomHeight + '%';
+        bar.style.background = `hsl(${200 + randomHeight}, 70%, 50%)`;
+      });
+    }, 50);
+  }
+  
+  function stopVolumeBars() {
+    const bars = document.querySelectorAll('.volume-bar-bottom');
+    bars.forEach((bar, i) => {
+      bar.style.height = (i + 1) * 6 + '%';
+      bar.style.background = 'var(--primary-color)';
+    });
+  }
+  
+  window.completeBottomSpeakerTest = (passed) => {
+    window.stopBottomSpeaker();
     updateTestResult("speaker-bottom", passed);
-  }, 2000);
+    closeModal();
+  };
+  
+  // Auto cleanup on modal close
+  const originalClose = window.closeModal;
+  window.closeModal = function() {
+    window.stopBottomSpeaker();
+    originalClose();
+    window.closeModal = originalClose;
+  };
 }
 
 function testMicrophone() {
@@ -330,48 +589,191 @@ function testMicrophone() {
     return;
   }
 
-  navigator.mediaDevices
-    .getUserMedia({ audio: true })
-    .then((stream) => {
-      const mediaRecorder = new MediaRecorder(stream);
-      const chunks = [];
+  const content = `
+    <div style="padding: 40px; text-align: center;">
+      <h2>🎤 Test mikrofónu</h2>
+      <p style="margin: 20px 0;">
+        Nahraj svoju správu a potom si ju prehraj
+      </p>
+      
+      <div id="mic-visual" style="width: 150px; height: 150px; background: var(--danger-color); 
+           border-radius: 50%; margin: 30px auto; display: flex; align-items: center; 
+           justify-content: center; font-size: 3rem;">
+        🎤
+      </div>
+      
+      <div id="waveform" style="display: flex; gap: 3px; justify-content: center; margin: 20px 0; height: 100px; align-items: center;">
+        ${Array.from({length: 30}, () => `
+          <div style="width: 6px; background: var(--danger-color); border-radius: 3px; 
+               transition: height 0.05s; height: 5px;" 
+               class="wave-bar"></div>
+        `).join('')}
+      </div>
+      
+      <div id="timer" style="font-size: 2rem; font-weight: bold; color: var(--danger-color); margin: 20px 0;">
+        00:00
+      </div>
+      
+      <div id="recording-controls">
+        <button onclick="startRecording()" 
+                style="margin: 10px; padding: 20px 40px; background: var(--danger-color); 
+                       border: none; border-radius: 12px; color: white; font-size: 1.1rem; font-weight: 600;">
+          ⏺ Začať nahrávanie
+        </button>
+      </div>
+      
+      <div id="playback-area" style="display: none; margin-top: 30px;">
+        <h3>Nahrávka dokončená!</h3>
+        <audio id="playback-audio" controls style="width: 100%; max-width: 400px; margin: 20px 0;"></audio>
+        
+        <div>
+          <button onclick="completeMicTest(true)" 
+                  style="margin: 10px; padding: 15px 30px; background: var(--success-color); 
+                         border: none; border-radius: 12px; color: white; font-size: 1rem;">
+            ✓ Mikrofón funguje dobre
+          </button>
+          <button onclick="completeMicTest(false)" 
+                  style="margin: 10px; padding: 15px 30px; background: var(--danger-color); 
+                         border: none; border-radius: 12px; color: white; font-size: 1rem;">
+            ✗ Slabý / Šum / Nefunguje
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  openModal(content);
+  
+  let mediaRecorder = null;
+  let audioChunks = [];
+  let stream = null;
+  let recordingTime = 0;
+  let timerInterval = null;
+  let audioContext = null;
+  let analyser = null;
+  let animationFrame = null;
 
-      mediaRecorder.ondataavailable = (e) => {
-        chunks.push(e.data);
-      };
+  window.startRecording = () => {
+    navigator.mediaDevices
+      .getUserMedia({ audio: true })
+      .then((audioStream) => {
+        stream = audioStream;
+        mediaRecorder = new MediaRecorder(stream);
+        audioChunks = [];
 
-      mediaRecorder.onstop = () => {
-        const blob = new Blob(chunks, { type: "audio/webm" });
-        const audioURL = URL.createObjectURL(blob);
-        const audio = new Audio(audioURL);
+        // Setup audio analysis for waveform
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        audioContext = new AudioContext();
+        const source = audioContext.createMediaStreamSource(stream);
+        analyser = audioContext.createAnalyser();
+        analyser.fftSize = 64;
+        source.connect(analyser);
+        
+        visualizeAudio();
 
-        const content = `
-                    <div class="audio-recorder">
-                        <h2>Nahrávka dokončená</h2>
-                        <p>Prehraj si nahrávku:</p>
-                        <audio controls src="${audioURL}" style="width: 100%; max-width: 400px;"></audio>
-                        <button onclick="completeMicTest(true)">✓ Mikrofón funguje</button>
-                        <button onclick="completeMicTest(false)">✗ Problém s mikrofónom</button>
-                    </div>
-                `;
-        openModal(content);
+        mediaRecorder.ondataavailable = (e) => {
+          audioChunks.push(e.data);
+        };
 
-        stream.getTracks().forEach((track) => track.stop());
-      };
+        mediaRecorder.onstop = () => {
+          const blob = new Blob(audioChunks, { type: "audio/webm" });
+          const audioURL = URL.createObjectURL(blob);
+          
+          document.getElementById('playback-audio').src = audioURL;
+          document.getElementById('playback-area').style.display = 'block';
+          document.getElementById('recording-controls').style.display = 'none';
+          
+          // Stop visualization
+          if (animationFrame) {
+            cancelAnimationFrame(animationFrame);
+          }
+          if (audioContext) {
+            audioContext.close();
+          }
+          
+          const visual = document.getElementById('mic-visual');
+          if (visual) {
+            visual.style.background = 'var(--success-color)';
+            visual.innerHTML = '✓';
+          }
 
-      alert("Začína nahrávanie. Povedz niečo do mikrofónu...");
-      mediaRecorder.start();
+          stream.getTracks().forEach((track) => track.stop());
+        };
 
-      setTimeout(() => {
-        mediaRecorder.stop();
-      }, 3000);
-    })
-    .catch((error) => {
-      alert("Chyba prístupu k mikrofónu: " + error.message);
-      updateTestResult("microphone", false);
-    });
+        mediaRecorder.start();
+        
+        const visual = document.getElementById('mic-visual');
+        if (visual) {
+          visual.style.animation = 'pulse 1s ease-in-out infinite';
+        }
+        
+        // Update timer
+        recordingTime = 0;
+        timerInterval = setInterval(() => {
+          recordingTime++;
+          const minutes = Math.floor(recordingTime / 60).toString().padStart(2, '0');
+          const seconds = (recordingTime % 60).toString().padStart(2, '0');
+          document.getElementById('timer').textContent = `${minutes}:${seconds}`;
+        }, 1000);
+        
+        document.getElementById('recording-controls').innerHTML = `
+          <button onclick="stopRecording()" 
+                  style="margin: 10px; padding: 20px 40px; background: var(--danger-color); 
+                         border: none; border-radius: 12px; color: white; font-size: 1.1rem; font-weight: 600;">
+            ⏹ Zastaviť nahrávanie
+          </button>
+        `;
+      })
+      .catch((error) => {
+        alert("Chyba prístupu k mikrofónu: " + error.message);
+        closeModal();
+      });
+  };
+  
+  window.stopRecording = () => {
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+      mediaRecorder.stop();
+      clearInterval(timerInterval);
+    }
+  };
+  
+  function visualizeAudio() {
+    if (!analyser) return;
+    
+    const bufferLength = analyser.frequencyBinCount;
+    const dataArray = new Uint8Array(bufferLength);
+    const bars = document.querySelectorAll('.wave-bar');
+    
+    function draw() {
+      animationFrame = requestAnimationFrame(draw);
+      
+      analyser.getByteFrequencyData(dataArray);
+      
+      bars.forEach((bar, i) => {
+        const index = Math.floor(i * bufferLength / bars.length);
+        const value = dataArray[index];
+        const height = (value / 255) * 100;
+        bar.style.height = Math.max(5, height) + 'px';
+        bar.style.background = `hsl(${height * 1.2}, 70%, 50%)`;
+      });
+    }
+    
+    draw();
+  }
 
   window.completeMicTest = (passed) => {
+    if (stream) {
+      stream.getTracks().forEach((track) => track.stop());
+    }
+    if (timerInterval) {
+      clearInterval(timerInterval);
+    }
+    if (animationFrame) {
+      cancelAnimationFrame(animationFrame);
+    }
+    if (audioContext) {
+      audioContext.close();
+    }
     updateTestResult("microphone", passed);
     closeModal();
   };
@@ -433,80 +835,122 @@ function testCamera(facingMode, testName, title) {
 
 // Sensor Tests
 function testProximity() {
-  // Modern approach: Use Proximity Sensor API if available
-  if ("ProximitySensor" in window) {
+  // Note: Proximity Sensor API is not supported in Safari/iOS
+  // We use ambient light sensor changes as indirect detection or manual testing
+  
+  showStatus(
+    "proximity-status",
+    "Safari nepodporuje Proximity Sensor API.\nSpustím alternatívny test...",
+    "info"
+  );
+  
+  // Try using ambient light sensor as indirect proximity detection
+  if ('AmbientLightSensor' in window) {
     try {
-      const sensor = new ProximitySensor();
-      sensor.addEventListener("reading", () => {
-        showStatus(
-          "proximity-status",
-          `✓ Proximity aktívny - Vzdialenosť: ${sensor.distance}cm`,
-          "success"
-        );
+      const sensor = new AmbientLightSensor();
+      let readings = [];
+      
+      sensor.addEventListener('reading', () => {
+        readings.push(sensor.illuminance);
+        if (readings.length > 3) {
+          // Check for sudden darkness (proximity)
+          const recent = readings.slice(-3);
+          const avg = recent.reduce((a, b) => a + b) / recent.length;
+          if (avg < 1) {
+            showStatus(
+              "proximity-status",
+              `✓ Možná proximity detekcia - Tma: ${avg.toFixed(2)} lux`,
+              "success"
+            );
+          } else {
+            showStatus(
+              "proximity-status",
+              `Svetlo: ${avg.toFixed(2)} lux - Zakry senzor`,
+              "info"
+            );
+          }
+        }
       });
-      sensor.addEventListener("error", (error) => {
-        showStatus(
-          "proximity-status",
-          `Chyba senzora: ${error.message}`,
-          "error"
-        );
+      
+      sensor.addEventListener('error', (error) => {
+        showStatus("proximity-status", `Chyba senzora: ${error.message}`, "error");
+        manualProximityTest();
       });
+      
       sensor.start();
-
+      
+      alert("Zakry horný okraj displeja (kde je slúchadlo) rukou na 2 sekundy.");
+      
       setTimeout(() => {
         sensor.stop();
-        const passed = confirm("Fungoval proximity senzor?");
+        const passed = confirm("Fungoval test proximity senzora? (Videl si zmenu svetla?)");
         updateTestResult("proximity", passed);
       }, 5000);
     } catch (error) {
       showStatus("proximity-status", `Chyba: ${error.message}`, "error");
       manualProximityTest();
     }
-  } else if ("ondeviceproximity" in window) {
-    // Fallback to older API
-    let proximityDetected = false;
-    const handler = (event) => {
-      proximityDetected = true;
-      showStatus(
-        "proximity-status",
-        `✓ Proximity detekovaný - ${event.near ? "Blízko" : "Ďaleko"} (${
-          event.value
-        }cm)`,
-        "success"
-      );
-    };
-
-    window.addEventListener("deviceproximity", handler);
-
-    showStatus(
-      "proximity-status",
-      "Zakry proximity senzor (horná časť displeja)...",
-      "info"
-    );
-
-    setTimeout(() => {
-      window.removeEventListener("deviceproximity", handler);
-      if (proximityDetected) {
-        updateTestResult("proximity", true);
-      } else {
-        manualProximityTest();
-      }
-    }, 5000);
   } else {
+    // Direct manual test - most reliable for iOS
     manualProximityTest();
   }
 
   function manualProximityTest() {
     showStatus(
       "proximity-status",
-      "Proximity API nie je podporované. Otestuj manuálne pri hovore.",
+      "⚠️ Proximity API nie je v Safari dostupné.\nSpustím manuálny test...",
       "warning"
     );
-    alert(
-      "Zavolaj niekomu a skontroluj či sa displej zhasne pri priložení k uchu."
-    );
-    const passed = confirm("Zhasne obrazovka pri priložení k uchu?");
-    updateTestResult("proximity", passed);
+    
+    const content = `
+      <div style="padding: 40px; text-align: center;">
+        <h2>🔍 Proximity Sensor Test</h2>
+        <p style="margin: 20px 0; font-size: 1.1rem;">
+          Proximity senzor sa používa pri telefonovaní,<br>
+          aby sa vypol displej keď telefón priložíš k uchu.
+        </p>
+        
+        <div style="background: var(--card-bg); padding: 30px; border-radius: 15px; margin: 20px 0;">
+          <h3 style="color: var(--primary-color); margin-bottom: 15px;">Test:</h3>
+          <ol style="text-align: left; line-height: 2; font-size: 1rem;">
+            <li>Zavolaj na iný telefón (alebo sa nechaj zavolať)</li>
+            <li>Počas hovoru priloži iPhone k uchu</li>
+            <li>Displej by sa mal ZHASNÚŤ</li>
+            <li>Odlož telefón od ucha</li>
+            <li>Displej by sa mal ROZSVIETI</li>
+          </ol>
+        </div>
+        
+        <p style="margin: 20px 0; color: var(--warning-color);">
+          ⚡ Tip: Môžeš zavolať na vlastné číslo cez FaceTime
+        </p>
+        
+        <div style="margin-top: 30px;">
+          <button onclick="completeProximityTest(true)" 
+                  style="margin: 10px; padding: 20px 40px; background: var(--success-color); 
+                         border: none; border-radius: 12px; color: white; font-size: 1.1rem; font-weight: 600;">
+            ✓ Displej sa vypína/zapína správne
+          </button>
+          <button onclick="completeProximityTest(false)" 
+                  style="margin: 10px; padding: 20px 40px; background: var(--danger-color); 
+                         border: none; border-radius: 12px; color: white; font-size: 1.1rem; font-weight: 600;">
+            ✗ Displej nereaguje
+          </button>
+        </div>
+      </div>
+    `;
+    
+    openModal(content);
+    
+    window.completeProximityTest = (passed) => {
+      updateTestResult("proximity", passed);
+      closeModal();
+      showStatus(
+        "proximity-status",
+        passed ? "✓ Proximity senzor funguje" : "✗ Proximity senzor nefunguje",
+        passed ? "success" : "error"
+      );
+    };
   }
 }
 

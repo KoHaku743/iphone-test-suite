@@ -365,8 +365,15 @@ function testTopSpeaker() {
         await audioContext.resume();
       }
 
-      // Wait a brief moment to ensure context is ready
-      await new Promise(resolve => setTimeout(resolve, 50));
+      // iOS Safari: Create a silent buffer first to "unlock" audio
+      const buffer = audioContext.createBuffer(1, 1, 22050);
+      const source = audioContext.createBufferSource();
+      source.buffer = buffer;
+      source.connect(audioContext.destination);
+      source.start(0);
+
+      // Wait for unlock
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
       oscillator = audioContext.createOscillator();
       gainNode = audioContext.createGain();
@@ -377,13 +384,12 @@ function testTopSpeaker() {
       // 1000Hz tone for earpiece - MAX volume
       oscillator.frequency.value = 1000;
       oscillator.type = "sine";
-      
+
       // Set gain immediately for Safari
       gainNode.gain.value = 1.0;
 
-      // Start oscillator with current time
-      const startTime = audioContext.currentTime;
-      oscillator.start(startTime);
+      // Start oscillator
+      oscillator.start(0);
 
       // Animate volume bars
       animateVolumeBars();
@@ -400,8 +406,8 @@ function testTopSpeaker() {
         statusDiv.innerHTML =
           '<strong style="color: var(--success-color);">▶ PREHRÁVA SA - Prilož k uchu!</strong><br><small>Zvýš hlasitosť tlačidlami na boku!</small>';
       }
-      
-      console.log("Top speaker audio started successfully");
+
+      console.log("Top speaker audio started successfully", "Context state:", audioContext.state);
     } catch (error) {
       console.error("Top speaker error:", error);
       const statusDiv = document.getElementById("top-speaker-status");
@@ -580,8 +586,15 @@ function testBottomSpeaker() {
         await audioContext.resume();
       }
 
-      // Wait a brief moment to ensure context is ready
-      await new Promise(resolve => setTimeout(resolve, 50));
+      // iOS Safari: Create a silent buffer first to "unlock" audio
+      const buffer = audioContext.createBuffer(1, 1, 22050);
+      const source = audioContext.createBufferSource();
+      source.buffer = buffer;
+      source.connect(audioContext.destination);
+      source.start(0);
+
+      // Wait for unlock
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
       oscillator = audioContext.createOscillator();
       gainNode = audioContext.createGain();
@@ -591,13 +604,12 @@ function testBottomSpeaker() {
 
       oscillator.frequency.value = currentFreq;
       oscillator.type = "sine";
-      
+
       // Set gain immediately for Safari
       gainNode.gain.value = 1.0;
 
-      // Start oscillator with current time
-      const startTime = audioContext.currentTime;
-      oscillator.start(startTime);
+      // Start oscillator
+      oscillator.start(0);
 
       // Animate volume bars
       animateVolumeBars();
@@ -614,8 +626,8 @@ function testBottomSpeaker() {
       if (statusDiv) {
         statusDiv.innerHTML = `<strong style="color: var(--success-color);">▶ PREHRÁVA SA ${currentFreq}Hz</strong><br><small>Zvýš hlasitosť tlačidlami na boku!</small>`;
       }
-      
-      console.log("Bottom speaker audio started successfully");
+
+      console.log("Bottom speaker audio started successfully", "Context state:", audioContext.state);
     } catch (error) {
       console.error("Bottom speaker error:", error);
       const statusDiv = document.getElementById("bottom-speaker-status");

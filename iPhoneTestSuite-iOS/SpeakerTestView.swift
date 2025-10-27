@@ -44,7 +44,7 @@ struct SpeakerTestView: View {
                     .font(.headline)
                 
                 Slider(value: $frequency, in: 200...2000, step: 50)
-                    .onChange(of: frequency) { oldValue, newValue in
+                    .onChange(of: frequency) { newValue in
                         if audioManager.isPlaying {
                             audioManager.updateFrequency(newValue)
                         }

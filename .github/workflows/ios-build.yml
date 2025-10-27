@@ -387,15 +387,23 @@ jobs:
       
     - name: Build for iOS Simulator
       run: |
+        set -o pipefail
         xcodebuild clean build \
           -project iPhoneTestSuite.xcodeproj \
           -scheme iPhoneTestSuite \
           -sdk iphonesimulator \
           -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.2' \
+          -derivedDataPath ./DerivedData \
           CODE_SIGN_IDENTITY="" \
           CODE_SIGNING_REQUIRED=NO \
           CODE_SIGNING_ALLOWED=NO \
-          | xcpretty || true
+          | tee build.log
+          
+    - name: Find build artifacts
+      run: |
+        echo "Build output location:"
+        find ./DerivedData -name "*.app" -type d || echo "No .app bundles found"
+        ls -la ./DerivedData/Build/Products/ || echo "Products directory not found"
           
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
@@ -403,9 +411,10 @@ jobs:
       with:
         name: iPhoneTestSuite-Build
         path: |
-          build/
-          *.app
+          ./DerivedData/Build/Products/**/*.app
+          build.log
         retention-days: 7
+        if-no-files-found: warn
         
     - name: Build summary
       if: always()

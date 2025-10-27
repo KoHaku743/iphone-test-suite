@@ -1033,206 +1033,15 @@ function testCamera(facingMode, testName, title) {
 
 // Sensor Tests
 function testProximity() {
-  // Creative workaround: Use front camera + brightness detection
-  const content = `
-    <div style="padding: 40px; text-align: center;">
-      <h2>🔍 Proximity Sensor Test</h2>
-      <p style="margin: 20px 0; font-size: 1.1rem;">
-        Tento test použije prednú kameru na detekciu priblíženia
-      </p>
-      
-      <video id="proximity-video" autoplay playsinline style="width: 200px; height: 200px; border-radius: 15px; object-fit: cover; margin: 20px auto; display: block;"></video>
-      
-      <div id="proximity-indicator" style="width: 150px; height: 150px; background: var(--primary-color); border-radius: 50%; margin: 30px auto; display: flex; align-items: center; justify-content: center; font-size: 3rem; transition: all 0.3s;">
-        👋
-      </div>
-      
-      <div id="proximity-reading" style="font-size: 1.5rem; font-weight: bold; margin: 20px 0; color: var(--primary-color);">
-        Jas: <span id="brightness-value">-</span>
-      </div>
-      
-      <div id="proximity-instructions" style="background: var(--card-bg); padding: 20px; border-radius: 12px; margin: 20px 0;">
-        <p style="margin: 10px 0;"><strong>Inštrukcie:</strong></p>
-        <ol style="text-align: left; line-height: 2;">
-          <li>Klikni "Spustiť test" a povoľ kameru</li>
-          <li>Zakry hornú časť displeja rukou (kde je kamera)</li>
-          <li>Keď zisťujem tmu, indikátor sčervenie</li>
-          <li>Odlož ruku - indikátor zezelenie</li>
-        </ol>
-      </div>
-      
-      <div id="proximity-status-text" style="padding: 15px; margin: 20px 0; border-radius: 8px; background: rgba(255,255,255,0.1); font-size: 1.1rem; font-weight: bold;">
-        Pripravený na test
-      </div>
-      
-      <button onclick="startProximityCamera()" id="start-proximity-btn"
-              style="margin: 10px; padding: 20px 40px; background: var(--success-color); 
-                     border: none; border-radius: 12px; color: white; font-size: 1.1rem; font-weight: 600;">
-        ▶ Spustiť test
-      </button>
-      
-      <div style="margin-top: 30px; display: none;" id="proximity-result-buttons">
-        <p style="margin: 10px 0;">Fungovala detekcia priblíženia?</p>
-        <button onclick="completeProximityTest(true)" 
-                style="margin: 10px; padding: 15px 30px; background: var(--success-color); 
-                       border: none; border-radius: 12px; color: white; font-size: 1rem;">
-          ✓ Áno, fungovalo to
-        </button>
-        <button onclick="completeProximityTest(false)" 
-                style="margin: 10px; padding: 15px 30px; background: var(--danger-color); 
-                       border: none; border-radius: 12px; color: white; font-size: 1rem;">
-          ✗ Nefungovalo
-        </button>
-        <button onclick="skipToManualTest()" 
-                style="margin: 10px; padding: 15px 30px; background: var(--warning-color); 
-                       border: none; border-radius: 12px; color: white; font-size: 1rem;">
-          🔄 Manuálny test (hovor)
-        </button>
-      </div>
-    </div>
-  `;
-
-  openModal(content);
-
-  let stream = null;
-  let detectionInterval = null;
-  let proximityDetected = false;
-
-  window.startProximityCamera = async () => {
-    try {
-      stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "user" },
-        audio: false
-      });
-
-      const video = document.getElementById("proximity-video");
-      video.srcObject = stream;
-
-      document.getElementById("start-proximity-btn").style.display = "none";
-      document.getElementById("proximity-result-buttons").style.display = "block";
-
-      // Create canvas for brightness analysis
-      const canvas = document.createElement("canvas");
-      const ctx = canvas.getContext("2d");
-      canvas.width = 320;
-      canvas.height = 240;
-
-      let lowBrightnessCount = 0;
-      let highBrightnessCount = 0;
-
-      detectionInterval = setInterval(() => {
-        if (video.readyState === video.HAVE_ENOUGH_DATA) {
-          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-          const data = imageData.data;
-
-          // Calculate average brightness
-          let totalBrightness = 0;
-          for (let i = 0; i < data.length; i += 4) {
-            const r = data[i];
-            const g = data[i + 1];
-            const b = data[i + 2];
-            totalBrightness += (r + g + b) / 3;
-          }
-          const avgBrightness = totalBrightness / (data.length / 4);
-
-          const brightnessValue = document.getElementById("brightness-value");
-          const indicator = document.getElementById("proximity-indicator");
-          const statusText = document.getElementById("proximity-status-text");
-
-          if (brightnessValue) {
-            brightnessValue.textContent = avgBrightness.toFixed(0);
-          }
-
-          // Proximity detected when brightness is very low
-          if (avgBrightness < 30) {
-            lowBrightnessCount++;
-            if (lowBrightnessCount > 2) {
-              proximityDetected = true;
-              if (indicator) {
-                indicator.style.background = "var(--danger-color)";
-                indicator.innerHTML = "🚫";
-                indicator.style.transform = "scale(1.3)";
-              }
-              if (statusText) {
-                statusText.style.background = "var(--danger-color)";
-                statusText.textContent = "⚠️ PROXIMITY DETECTED - Objekt blízko!";
-              }
-              highBrightnessCount = 0;
-            }
-          } else if (avgBrightness > 50) {
-            highBrightnessCount++;
-            if (highBrightnessCount > 2 && proximityDetected) {
-              if (indicator) {
-                indicator.style.background = "var(--success-color)";
-                indicator.innerHTML = "✅";
-                indicator.style.transform = "scale(1.1)";
-              }
-              if (statusText) {
-                statusText.style.background = "var(--success-color)";
-                statusText.textContent = "✓ Objekt sa vzdialil - detekcia funguje!";
-              }
-              lowBrightnessCount = 0;
-            } else if (!proximityDetected) {
-              if (indicator) {
-                indicator.style.background = "var(--primary-color)";
-                indicator.innerHTML = "👋";
-                indicator.style.transform = "scale(1)";
-              }
-              if (statusText) {
-                statusText.style.background = "rgba(255,255,255,0.1)";
-                statusText.textContent = "Zakry kameru rukou...";
-              }
-            }
-          }
-        }
-      }, 200);
-
-    } catch (error) {
-      alert("Chyba prístupu ku kamere: " + error.message + "\n\nPrejdeme na manuálny test.");
-      skipToManualTest();
-    }
-  };
-
-  window.completeProximityTest = (passed) => {
-    if (stream) {
-      stream.getTracks().forEach(track => track.stop());
-    }
-    if (detectionInterval) {
-      clearInterval(detectionInterval);
-    }
-    updateTestResult("proximity", passed);
-    closeModal();
-    showStatus(
-      "proximity-status",
-      passed ? "✓ Proximity test úspešný" : "✗ Proximity test neúspešný",
-      passed ? "success" : "error"
-    );
-  };
-
-  window.skipToManualTest = () => {
-    if (stream) {
-      stream.getTracks().forEach(track => track.stop());
-    }
-    if (detectionInterval) {
-      clearInterval(detectionInterval);
-    }
-    closeModal();
-    setTimeout(() => manualProximityTest(), 100);
-  };
-
-  // Cleanup on modal close
-  const originalClose = window.closeModal;
-  window.closeModal = function() {
-    if (stream) {
-      stream.getTracks().forEach(track => track.stop());
-    }
-    if (detectionInterval) {
-      clearInterval(detectionInterval);
-    }
-    originalClose();
-    window.closeModal = originalClose;
-  };
+  // Safari/iOS has NO API access to the proximity sensor
+  // The ONLY way to test it is during an actual phone call
+  showStatus(
+    "proximity-status",
+    "⚠️ Web prehliadače nemajú prístup k proximity senzoru.\nJediný spôsob testovania je počas hovoru.",
+    "warning"
+  );
+  
+  manualProximityTest();
 }
 
   function manualProximityTest() {
@@ -1283,34 +1092,39 @@ function testProximity() {
     openModal(content);
 
   function manualProximityTest() {
-    showStatus(
-      "proximity-status",
-      "⚠️ Proximity API nie je v Safari dostupné.\nSpustím manuálny test...",
-      "warning"
-    );
-
     const content = `
       <div style="padding: 40px; text-align: center;">
         <h2>🔍 Proximity Sensor Test</h2>
-        <p style="margin: 20px 0; font-size: 1.1rem;">
-          Proximity senzor sa používa pri telefonovaní,<br>
-          aby sa vypol displej keď telefón priložíš k uchu.
+        <p style="margin: 20px 0; font-size: 1.1rem; color: var(--warning-color);">
+          ⚠️ Proximity senzor sa dá otestovať LEN počas skutočného hovoru
         </p>
         
         <div style="background: var(--card-bg); padding: 30px; border-radius: 15px; margin: 20px 0;">
-          <h3 style="color: var(--primary-color); margin-bottom: 15px;">Test:</h3>
-          <ol style="text-align: left; line-height: 2; font-size: 1rem;">
-            <li>Zavolaj na iný telefón (alebo sa nechaj zavolať)</li>
-            <li>Počas hovoru priloži iPhone k uchu</li>
-            <li>Displej by sa mal ZHASNÚŤ</li>
-            <li>Odlož telefón od ucha</li>
-            <li>Displej by sa mal ROZSVIETI</li>
+          <h3 style="color: var(--primary-color); margin-bottom: 15px;">📞 Ako testovať:</h3>
+          <ol style="text-align: left; line-height: 2.5; font-size: 1.05rem;">
+            <li><strong>Zavolaj na iný telefón</strong> (alebo sa nechaj zavolať)</li>
+            <li><strong>Počas aktívneho hovoru</strong> priloži iPhone k uchu</li>
+            <li>Displej by sa mal <strong style="color: var(--danger-color);">ZHASNÚŤ</strong> ⚫</li>
+            <li>Odlož telefón od ucha (5-10 cm)</li>
+            <li>Displej by sa mal <strong style="color: var(--success-color);">ROZSVIETI</strong> ✨</li>
+            <li>Opakuj 2-3x pre istotu</li>
           </ol>
         </div>
         
-        <p style="margin: 20px 0; color: var(--warning-color);">
-          ⚡ Tip: Môžeš zavolať na vlastné číslo cez FaceTime
-        </p>
+        <div style="background: rgba(66, 135, 245, 0.2); padding: 20px; border-radius: 12px; margin: 20px 0; border-left: 4px solid var(--primary-color);">
+          <p style="margin: 10px 0; font-size: 1rem;">
+            💡 <strong>Tip:</strong> Môžeš zavolať na vlastné číslo cez <strong>FaceTime Audio</strong>
+            alebo použiť službu ako <strong>Echo Test</strong>
+          </p>
+        </div>
+        
+        <div style="background: rgba(255, 193, 7, 0.2); padding: 20px; border-radius: 12px; margin: 20px 0; border-left: 4px solid var(--warning-color);">
+          <p style="margin: 10px 0; font-size: 0.95rem;">
+            ⚡ <strong>Prečo to funguje len počas hovoru?</strong><br>
+            iOS aktivuje proximity senzor len počas hovorov kvôli šetreniu batérie.
+            Webové aplikácie nemajú prístup k tomuto senzoru.
+          </p>
+        </div>
         
         <div style="margin-top: 30px;">
           <button onclick="completeProximityTest(true)" 
@@ -1321,7 +1135,12 @@ function testProximity() {
           <button onclick="completeProximityTest(false)" 
                   style="margin: 10px; padding: 20px 40px; background: var(--danger-color); 
                          border: none; border-radius: 12px; color: white; font-size: 1.1rem; font-weight: 600;">
-            ✗ Displej nereaguje
+            ✗ Displej nereaguje na priloženie
+          </button>
+          <button onclick="closeModal()" 
+                  style="margin: 10px; padding: 20px 40px; background: var(--card-bg); 
+                         border: 2px solid var(--text-secondary); border-radius: 12px; color: white; font-size: 1rem;">
+            Otestujem neskôr
           </button>
         </div>
       </div>

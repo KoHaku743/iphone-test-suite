@@ -382,7 +382,8 @@ struct BatteryTestView: View {
                     Image(systemName: batteryIcon)
                         .font(.system(size: 80))
                         .foregroundColor(.white)
-                        .symbolEffect(.pulse, isActive: batteryState == .charging)
+                        .scaleEffect(batteryState == .charging ? 1.1 : 1.0)
+                        .animation(batteryState == .charging ? .easeInOut(duration: 1.0).repeatForever(autoreverses: true) : .default, value: batteryState)
                     
                     Text("Battery Test")
                         .font(.largeTitle)

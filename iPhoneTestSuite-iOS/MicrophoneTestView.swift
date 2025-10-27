@@ -23,7 +23,8 @@ struct MicrophoneTestView: View {
                         Image(systemName: audioRecorder.isRecording ? "waveform.circle.fill" : "mic.fill")
                             .font(.system(size: 80))
                             .foregroundColor(audioRecorder.isRecording ? .red : .white)
-                            .symbolEffect(.pulse, isActive: audioRecorder.isRecording)
+                            .scaleEffect(audioRecorder.isRecording ? 1.1 : 1.0)
+                            .animation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true), value: audioRecorder.isRecording)
                         
                         Text("Mikrofón Test")
                             .font(.largeTitle)

@@ -353,12 +353,20 @@ function testTopSpeaker() {
       window.stopTopSpeaker();
 
       const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContext) {
+        alert("Web Audio API nie je podporované v tomto prehliadači");
+        return;
+      }
+
       audioContext = new AudioContext();
 
-      // Resume audio context (iOS requirement)
+      // Critical for iOS Safari - must resume in user gesture
       if (audioContext.state === "suspended") {
         await audioContext.resume();
       }
+
+      // Wait a brief moment to ensure context is ready
+      await new Promise(resolve => setTimeout(resolve, 50));
 
       oscillator = audioContext.createOscillator();
       gainNode = audioContext.createGain();
@@ -369,10 +377,13 @@ function testTopSpeaker() {
       // 1000Hz tone for earpiece - MAX volume
       oscillator.frequency.value = 1000;
       oscillator.type = "sine";
-      // Start at max volume immediately
-      gainNode.gain.setValueAtTime(1.0, audioContext.currentTime);
+      
+      // Set gain immediately for Safari
+      gainNode.gain.value = 1.0;
 
-      oscillator.start(audioContext.currentTime);
+      // Start oscillator with current time
+      const startTime = audioContext.currentTime;
+      oscillator.start(startTime);
 
       // Animate volume bars
       animateVolumeBars();
@@ -382,32 +393,56 @@ function testTopSpeaker() {
         visual.style.transform = "scale(1.2)";
         visual.style.background = "var(--success-color)";
       }
-      
+
       // Show playing status without alert (alert breaks iOS audio!)
-      const statusDiv = document.getElementById('top-speaker-status');
+      const statusDiv = document.getElementById("top-speaker-status");
       if (statusDiv) {
-        statusDiv.innerHTML = '<strong style="color: var(--success-color);">▶ PREHRÁVA SA - Prilož k uchu!</strong><br><small>Zvýš hlasitosť tlačidlami na boku!</small>';
+        statusDiv.innerHTML =
+          '<strong style="color: var(--success-color);">▶ PREHRÁVA SA - Prilož k uchu!</strong><br><small>Zvýš hlasitosť tlačidlami na boku!</small>';
       }
+      
+      console.log("Top speaker audio started successfully");
     } catch (error) {
-      alert("Chyba prehrávania: " + error.message);
+      console.error("Top speaker error:", error);
+      const statusDiv = document.getElementById("top-speaker-status");
+      if (statusDiv) {
+        statusDiv.innerHTML = `<strong style="color: var(--danger-color);">❌ Chyba: ${error.message}</strong>`;
+      }
     }
   };
 
   window.stopTopSpeaker = () => {
-    if (oscillator) {
-      oscillator.stop();
-      oscillator = null;
+    try {
+      if (oscillator) {
+        try {
+          oscillator.stop();
+          oscillator.disconnect();
+        } catch (e) {
+          console.log("Oscillator already stopped");
+        }
+        oscillator = null;
+      }
+      if (gainNode) {
+        try {
+          gainNode.disconnect();
+        } catch (e) {
+          console.log("Gain node already disconnected");
+        }
+        gainNode = null;
+      }
+      if (audioContext) {
+        audioContext.close();
+        audioContext = null;
+      }
+      const visual = document.getElementById("top-speaker-visual");
+      if (visual) {
+        visual.style.transform = "scale(1)";
+        visual.style.background = "var(--primary-color)";
+      }
+      stopVolumeBars();
+    } catch (error) {
+      console.error("Error stopping top speaker:", error);
     }
-    if (audioContext) {
-      audioContext.close();
-      audioContext = null;
-    }
-    const visual = document.getElementById("top-speaker-visual");
-    if (visual) {
-      visual.style.transform = "scale(1)";
-      visual.style.background = "var(--primary-color)";
-    }
-    stopVolumeBars();
   };
 
   function animateVolumeBars() {
@@ -533,12 +568,20 @@ function testBottomSpeaker() {
       window.stopBottomSpeaker();
 
       const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContext) {
+        alert("Web Audio API nie je podporované v tomto prehliadači");
+        return;
+      }
+
       audioContext = new AudioContext();
 
-      // Resume audio context (iOS requirement)
+      // Critical for iOS Safari - must resume in user gesture
       if (audioContext.state === "suspended") {
         await audioContext.resume();
       }
+
+      // Wait a brief moment to ensure context is ready
+      await new Promise(resolve => setTimeout(resolve, 50));
 
       oscillator = audioContext.createOscillator();
       gainNode = audioContext.createGain();
@@ -548,10 +591,13 @@ function testBottomSpeaker() {
 
       oscillator.frequency.value = currentFreq;
       oscillator.type = "sine";
-      // Start at max volume immediately
-      gainNode.gain.setValueAtTime(1.0, audioContext.currentTime);
+      
+      // Set gain immediately for Safari
+      gainNode.gain.value = 1.0;
 
-      oscillator.start(audioContext.currentTime);
+      // Start oscillator with current time
+      const startTime = audioContext.currentTime;
+      oscillator.start(startTime);
 
       // Animate volume bars
       animateVolumeBars();
@@ -562,33 +608,56 @@ function testBottomSpeaker() {
         visual.style.background = "var(--success-color)";
         visual.innerHTML = "🔊";
       }
-      
+
       // Show playing status without alert (alert breaks iOS audio!)
-      const statusDiv = document.getElementById('bottom-speaker-status');
+      const statusDiv = document.getElementById("bottom-speaker-status");
       if (statusDiv) {
         statusDiv.innerHTML = `<strong style="color: var(--success-color);">▶ PREHRÁVA SA ${currentFreq}Hz</strong><br><small>Zvýš hlasitosť tlačidlami na boku!</small>`;
       }
+      
+      console.log("Bottom speaker audio started successfully");
     } catch (error) {
-      alert("Chyba prehrávania: " + error.message);
+      console.error("Bottom speaker error:", error);
+      const statusDiv = document.getElementById("bottom-speaker-status");
+      if (statusDiv) {
+        statusDiv.innerHTML = `<strong style="color: var(--danger-color);">❌ Chyba: ${error.message}</strong>`;
+      }
     }
   };
 
   window.stopBottomSpeaker = () => {
-    if (oscillator) {
-      oscillator.stop();
-      oscillator = null;
+    try {
+      if (oscillator) {
+        try {
+          oscillator.stop();
+          oscillator.disconnect();
+        } catch (e) {
+          console.log("Oscillator already stopped");
+        }
+        oscillator = null;
+      }
+      if (gainNode) {
+        try {
+          gainNode.disconnect();
+        } catch (e) {
+          console.log("Gain node already disconnected");
+        }
+        gainNode = null;
+      }
+      if (audioContext) {
+        audioContext.close();
+        audioContext = null;
+      }
+      const visual = document.getElementById("bottom-speaker-visual");
+      if (visual) {
+        visual.style.transform = "scale(1)";
+        visual.style.background = "var(--primary-color)";
+        visual.innerHTML = "🔈";
+      }
+      stopVolumeBars();
+    } catch (error) {
+      console.error("Error stopping bottom speaker:", error);
     }
-    if (audioContext) {
-      audioContext.close();
-      audioContext = null;
-    }
-    const visual = document.getElementById("bottom-speaker-visual");
-    if (visual) {
-      visual.style.transform = "scale(1)";
-      visual.style.background = "var(--primary-color)";
-      visual.innerHTML = "🔈";
-    }
-    stopVolumeBars();
   };
 
   function animateVolumeBars() {

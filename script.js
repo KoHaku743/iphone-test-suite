@@ -434,54 +434,60 @@ function testCamera(facingMode, testName, title) {
 // Sensor Tests
 function testProximity() {
   // Modern approach: Use Proximity Sensor API if available
-  if ('ProximitySensor' in window) {
+  if ("ProximitySensor" in window) {
     try {
       const sensor = new ProximitySensor();
-      sensor.addEventListener('reading', () => {
+      sensor.addEventListener("reading", () => {
         showStatus(
-          'proximity-status',
+          "proximity-status",
           `✓ Proximity aktívny - Vzdialenosť: ${sensor.distance}cm`,
-          'success'
+          "success"
         );
       });
-      sensor.addEventListener('error', (error) => {
-        showStatus('proximity-status', `Chyba senzora: ${error.message}`, 'error');
+      sensor.addEventListener("error", (error) => {
+        showStatus(
+          "proximity-status",
+          `Chyba senzora: ${error.message}`,
+          "error"
+        );
       });
       sensor.start();
-      
+
       setTimeout(() => {
         sensor.stop();
-        const passed = confirm('Fungoval proximity senzor?');
-        updateTestResult('proximity', passed);
+        const passed = confirm("Fungoval proximity senzor?");
+        updateTestResult("proximity", passed);
       }, 5000);
     } catch (error) {
-      showStatus('proximity-status', `Chyba: ${error.message}`, 'error');
+      showStatus("proximity-status", `Chyba: ${error.message}`, "error");
       manualProximityTest();
     }
-  } else if ('ondeviceproximity' in window) {
+  } else if ("ondeviceproximity" in window) {
     // Fallback to older API
     let proximityDetected = false;
     const handler = (event) => {
       proximityDetected = true;
       showStatus(
-        'proximity-status',
-        `✓ Proximity detekovaný - ${event.near ? 'Blízko' : 'Ďaleko'} (${event.value}cm)`,
-        'success'
+        "proximity-status",
+        `✓ Proximity detekovaný - ${event.near ? "Blízko" : "Ďaleko"} (${
+          event.value
+        }cm)`,
+        "success"
       );
     };
-    
-    window.addEventListener('deviceproximity', handler);
-    
+
+    window.addEventListener("deviceproximity", handler);
+
     showStatus(
-      'proximity-status',
-      'Zakry proximity senzor (horná časť displeja)...',
-      'info'
+      "proximity-status",
+      "Zakry proximity senzor (horná časť displeja)...",
+      "info"
     );
-    
+
     setTimeout(() => {
-      window.removeEventListener('deviceproximity', handler);
+      window.removeEventListener("deviceproximity", handler);
       if (proximityDetected) {
-        updateTestResult('proximity', true);
+        updateTestResult("proximity", true);
       } else {
         manualProximityTest();
       }
@@ -489,71 +495,99 @@ function testProximity() {
   } else {
     manualProximityTest();
   }
-  
+
   function manualProximityTest() {
     showStatus(
-      'proximity-status',
-      'Proximity API nie je podporované. Otestuj manuálne pri hovore.',
-      'warning'
+      "proximity-status",
+      "Proximity API nie je podporované. Otestuj manuálne pri hovore.",
+      "warning"
     );
-    alert('Zavolaj niekomu a skontroluj či sa displej zhasne pri priložení k uchu.');
-    const passed = confirm('Zhasne obrazovka pri priložení k uchu?');
-    updateTestResult('proximity', passed);
+    alert(
+      "Zavolaj niekomu a skontroluj či sa displej zhasne pri priložení k uchu."
+    );
+    const passed = confirm("Zhasne obrazovka pri priložení k uchu?");
+    updateTestResult("proximity", passed);
   }
 }
 
 function testBiometric() {
-  if (window.PublicKeyCredential && PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable) {
+  if (
+    window.PublicKeyCredential &&
+    PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable
+  ) {
     PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()
-      .then(available => {
+      .then((available) => {
         if (available) {
-          showStatus("biometric-status", "✓ Biometrická autentifikácia je dostupná", "success");
-          
+          showStatus(
+            "biometric-status",
+            "✓ Biometrická autentifikácia je dostupná",
+            "success"
+          );
+
           // Try to create a credential (this will trigger FaceID/TouchID)
           const challenge = new Uint8Array(32);
           window.crypto.getRandomValues(challenge);
-          
+
           const publicKeyCredentialCreationOptions = {
             challenge: challenge,
             rp: {
               name: "iPhone Test Suite",
-              id: window.location.hostname || "localhost"
+              id: window.location.hostname || "localhost",
             },
             user: {
               id: new Uint8Array(16),
               name: "testuser@test.com",
-              displayName: "Test User"
+              displayName: "Test User",
             },
-            pubKeyCredParams: [{alg: -7, type: "public-key"}],
+            pubKeyCredParams: [{ alg: -7, type: "public-key" }],
             authenticatorSelection: {
               authenticatorAttachment: "platform",
-              userVerification: "required"
+              userVerification: "required",
             },
             timeout: 60000,
-            attestation: "none"
+            attestation: "none",
           };
-          
-          navigator.credentials.create({
-            publicKey: publicKeyCredentialCreationOptions
-          })
-          .then(credential => {
-            showStatus("biometric-status", "✓ FaceID/TouchID test úspešný!", "success");
-            updateTestResult("biometric", true);
-          })
-          .catch(error => {
-            showStatus("biometric-status", `Test preskočený: ${error.message}`, "warning");
-            const passed = confirm("Otestuj odomknutie telefónu pomocou FaceID/TouchID. Funguje?");
-            updateTestResult("biometric", passed);
-          });
+
+          navigator.credentials
+            .create({
+              publicKey: publicKeyCredentialCreationOptions,
+            })
+            .then((credential) => {
+              showStatus(
+                "biometric-status",
+                "✓ FaceID/TouchID test úspešný!",
+                "success"
+              );
+              updateTestResult("biometric", true);
+            })
+            .catch((error) => {
+              showStatus(
+                "biometric-status",
+                `Test preskočený: ${error.message}`,
+                "warning"
+              );
+              const passed = confirm(
+                "Otestuj odomknutie telefónu pomocou FaceID/TouchID. Funguje?"
+              );
+              updateTestResult("biometric", passed);
+            });
         } else {
-          showStatus("biometric-status", "Biometrická autentifikácia nie je dostupná", "warning");
-          const passed = confirm("Skús odomknúť telefón cez FaceID/TouchID. Funguje?");
+          showStatus(
+            "biometric-status",
+            "Biometrická autentifikácia nie je dostupná",
+            "warning"
+          );
+          const passed = confirm(
+            "Skús odomknúť telefón cez FaceID/TouchID. Funguje?"
+          );
           updateTestResult("biometric", passed);
         }
       })
-      .catch(error => {
+      .catch((error) => {
         showStatus("biometric-status", "Chyba pri kontrole biometrie", "error");
-        const passed = confirm("Skús odomknúť telefón cez FaceID/TouchID. Funguje?");
+        const passed = confirm(
+          "Skús odomknúť telefón cez FaceID/TouchID. Funguje?"
+        );
         updateTestResult("biometric", passed);
       });
   } else {
@@ -628,7 +662,7 @@ function testGyroscope() {
         const betaEl = document.getElementById("beta");
         const gammaEl = document.getElementById("gamma");
         const ball = document.getElementById("gyro-ball");
-        
+
         if (alphaEl && event.alpha !== null) {
           alphaEl.textContent = Math.round(event.alpha) + "°";
         }
@@ -645,9 +679,9 @@ function testGyroscope() {
           ball.style.transform = `translate(${x}px, ${y}px)`;
         }
       };
-      
+
       window.addEventListener("deviceorientation", handler);
-      currentTest = { handler: handler, type: 'orientation' };
+      currentTest = { handler: handler, type: "orientation" };
     }
   } else {
     showStatus("gyro-status", "Gyroskop nie je podporovaný", "error");
@@ -730,15 +764,17 @@ function testAccelerometer() {
           const zEl = document.getElementById("accel-z");
           const magEl = document.getElementById("accel-mag");
           const indicator = document.getElementById("shake-indicator");
-          
+
           if (xEl) xEl.textContent = acc.x.toFixed(2);
           if (yEl) yEl.textContent = acc.y.toFixed(2);
           if (zEl) zEl.textContent = acc.z.toFixed(2);
-          
+
           // Calculate magnitude
-          const magnitude = Math.sqrt(acc.x * acc.x + acc.y * acc.y + acc.z * acc.z);
+          const magnitude = Math.sqrt(
+            acc.x * acc.x + acc.y * acc.y + acc.z * acc.z
+          );
           if (magEl) magEl.textContent = magnitude.toFixed(2);
-          
+
           // Detect shake
           if (magnitude > 20 && Date.now() - lastShake > 500) {
             lastShake = Date.now();
@@ -753,13 +789,15 @@ function testAccelerometer() {
           }
         }
       };
-      
+
       window.addEventListener("devicemotion", handler);
-      currentTest = { handler: handler, type: 'motion' };
+      currentTest = { handler: handler, type: "motion" };
     }
   } else {
     showStatus("accel-status", "Akcelerometer nie je podporovaný", "error");
-    alert("Akcelerometer API nie je dostupné v tomto zariadení alebo prehliadači");
+    alert(
+      "Akcelerometer API nie je dostupné v tomto zariadení alebo prehliadači"
+    );
   }
 
   window.completeAccelTest = (passed) => {
@@ -780,44 +818,57 @@ function testWiFi() {
     navigator.webkitConnection;
 
   let message = online ? "✓ Online pripojenie aktívne" : "✗ Žiadne pripojenie";
-  
+
   if (connection) {
-    const effectiveType = connection.effectiveType || 'neznámy';
-    const downlink = connection.downlink ? connection.downlink.toFixed(2) : 'N/A';
-    const rtt = connection.rtt || 'N/A';
-    const saveData = connection.saveData ? 'Áno' : 'Nie';
-    
+    const effectiveType = connection.effectiveType || "neznámy";
+    const downlink = connection.downlink
+      ? connection.downlink.toFixed(2)
+      : "N/A";
+    const rtt = connection.rtt || "N/A";
+    const saveData = connection.saveData ? "Áno" : "Nie";
+
     message += `\n\nTyp: ${effectiveType}`;
     message += `\nRýchlosť: ${downlink} Mbps`;
     message += `\nLatencia (RTT): ${rtt} ms`;
     message += `\nÚspora dát: ${saveData}`;
-    
+
     // Detect connection type
     if (connection.type) {
       message += `\nPripojenie: ${connection.type}`;
     }
   }
-  
+
   // Perform actual connectivity test
-  fetch('https://www.google.com/favicon.ico', { mode: 'no-cors', cache: 'no-store' })
+  fetch("https://www.google.com/favicon.ico", {
+    mode: "no-cors",
+    cache: "no-store",
+  })
     .then(() => {
-      showStatus("wifi-status", message + "\n\n✓ Internetové pripojenie funguje", online ? "success" : "error");
+      showStatus(
+        "wifi-status",
+        message + "\n\n✓ Internetové pripojenie funguje",
+        online ? "success" : "error"
+      );
       updateTestResult("wifi", true);
     })
     .catch(() => {
-      showStatus("wifi-status", message + "\n\n✗ Problém s pripojením", "error");
+      showStatus(
+        "wifi-status",
+        message + "\n\n✗ Problém s pripojením",
+        "error"
+      );
       updateTestResult("wifi", false);
     });
-  
+
   // Monitor connection changes
-  window.addEventListener('online', () => {
+  window.addEventListener("online", () => {
     showStatus("wifi-status", "✓ Pripojenie obnovené", "success");
   });
-  
-  window.addEventListener('offline', () => {
+
+  window.addEventListener("offline", () => {
     showStatus("wifi-status", "✗ Pripojenie stratené", "error");
   });
-  
+
   showStatus("wifi-status", message + "\n\nTestujem pripojenie...", "info");
 }
 
@@ -828,37 +879,40 @@ function testBluetooth() {
       "Bluetooth API je dostupné. Skúšam vyhľadať zariadenia...",
       "info"
     );
-    
+
     // Try to scan for Bluetooth devices
-    navigator.bluetooth.requestDevice({
-      acceptAllDevices: true,
-      optionalServices: ['battery_service', 'device_information']
-    })
-    .then(device => {
-      showStatus(
-        "bluetooth-status",
-        `✓ Bluetooth funguje! Nájdené zariadenie: ${device.name || 'Neznáme'}`,
-        "success"
-      );
-      updateTestResult("bluetooth", true);
-    })
-    .catch(error => {
-      if (error.name === 'NotFoundError') {
+    navigator.bluetooth
+      .requestDevice({
+        acceptAllDevices: true,
+        optionalServices: ["battery_service", "device_information"],
+      })
+      .then((device) => {
         showStatus(
           "bluetooth-status",
-          "Žiadne Bluetooth zariadenia nenájdené. Skontroluj v Nastaveniach.",
-          "warning"
+          `✓ Bluetooth funguje! Nájdené zariadenie: ${
+            device.name || "Neznáme"
+          }`,
+          "success"
         );
-      } else {
-        showStatus(
-          "bluetooth-status",
-          `Bluetooth test: ${error.message}`,
-          "warning"
-        );
-      }
-      const passed = confirm("Je Bluetooth funkčný v nastaveniach?");
-      updateTestResult("bluetooth", passed);
-    });
+        updateTestResult("bluetooth", true);
+      })
+      .catch((error) => {
+        if (error.name === "NotFoundError") {
+          showStatus(
+            "bluetooth-status",
+            "Žiadne Bluetooth zariadenia nenájdené. Skontroluj v Nastaveniach.",
+            "warning"
+          );
+        } else {
+          showStatus(
+            "bluetooth-status",
+            `Bluetooth test: ${error.message}`,
+            "warning"
+          );
+        }
+        const passed = confirm("Je Bluetooth funkčný v nastaveniach?");
+        updateTestResult("bluetooth", passed);
+      });
   } else {
     showStatus(
       "bluetooth-status",
@@ -900,25 +954,26 @@ function testGPS() {
 }
 
 function testNFC() {
-  if ('NDEFReader' in window) {
+  if ("NDEFReader" in window) {
     showStatus(
       "nfc-status",
       "NFC je podporované! Inicializujem čítačku...",
       "info"
     );
-    
+
     try {
       const ndef = new NDEFReader();
-      
+
       // Try to scan for NFC tags
-      ndef.scan()
+      ndef
+        .scan()
         .then(() => {
           showStatus(
             "nfc-status",
             "✓ NFC je aktívne a pripravené na čítanie tagov. Skús Apple Pay!",
             "success"
           );
-          
+
           ndef.addEventListener("reading", ({ message, serialNumber }) => {
             showStatus(
               "nfc-status",
@@ -926,21 +981,17 @@ function testNFC() {
               "success"
             );
           });
-          
+
           ndef.addEventListener("readingerror", () => {
-            showStatus(
-              "nfc-status",
-              "Chyba pri čítaní NFC tagu",
-              "error"
-            );
+            showStatus("nfc-status", "Chyba pri čítaní NFC tagu", "error");
           });
-          
+
           setTimeout(() => {
             const passed = confirm("Funguje NFC / Apple Pay?");
             updateTestResult("nfc", passed);
           }, 3000);
         })
-        .catch(error => {
+        .catch((error) => {
           showStatus(
             "nfc-status",
             `NFC: ${error.message}. Otestuj Apple Pay manuálne.`,
@@ -964,25 +1015,38 @@ function testNFC() {
       "NFC Web API nie je podporované v Safari. Otestuj Apple Pay manuálne.",
       "warning"
     );
-    alert("Otvor Nastavenia > Wallet & Apple Pay a skontroluj či je Apple Pay funkčný.\n\nAlebo skús doubletap na bočné tlačidlo pre Apple Pay.");
+    alert(
+      "Otvor Nastavenia > Wallet & Apple Pay a skontroluj či je Apple Pay funkčný.\n\nAlebo skús doubletap na bočné tlačidlo pre Apple Pay."
+    );
     const passed = confirm("Funguje Apple Pay / NFC platby?");
     updateTestResult("nfc", passed);
   }
 }
 
 function testCellular() {
-  const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-  
-  let message = "Manuálny test: Skús zavolať, poslať SMS a použiť mobilné dáta\n\n";
-  
+  const connection =
+    navigator.connection ||
+    navigator.mozConnection ||
+    navigator.webkitConnection;
+
+  let message =
+    "Manuálny test: Skús zavolať, poslať SMS a použiť mobilné dáta\n\n";
+
   if (connection) {
     const type = connection.type || connection.effectiveType;
     message += `Detekovaný typ pripojenia: ${type}\n`;
-    
-    if (type && (type.includes('cellular') || type.includes('4g') || type.includes('5g') || type.includes('3g') || type.includes('2g'))) {
+
+    if (
+      type &&
+      (type.includes("cellular") ||
+        type.includes("4g") ||
+        type.includes("5g") ||
+        type.includes("3g") ||
+        type.includes("2g"))
+    ) {
       message += "✓ Mobilné dáta sú pravdepodobne aktívne";
       showStatus("cellular-status", message, "success");
-    } else if (type === 'wifi') {
+    } else if (type === "wifi") {
       message += "⚠ Pripojený cez WiFi. Vypni WiFi pre test mobilných dát.";
       showStatus("cellular-status", message, "warning");
     } else {
@@ -991,10 +1055,12 @@ function testCellular() {
   } else {
     showStatus("cellular-status", message, "info");
   }
-  
+
   // Test mobile data by trying to fetch when WiFi might be off
-  alert("Pre kompletný test:\n\n1. Zavolaj na iný telefón\n2. Pošli SMS\n3. Vypni WiFi a načítaj webovú stránku\n\nVšetko musí fungovať.");
-  
+  alert(
+    "Pre kompletný test:\n\n1. Zavolaj na iný telefón\n2. Pošli SMS\n3. Vypni WiFi a načítaj webovú stránku\n\nVšetko musí fungovať."
+  );
+
   const passed = confirm("Fungujú hovory, SMS a mobilné dáta?");
   updateTestResult("cellular", passed);
 }
@@ -1005,7 +1071,7 @@ function checkBattery() {
     navigator.getBattery().then((battery) => {
       const level = (battery.level * 100).toFixed(0);
       const charging = battery.charging ? "⚡ Nabíja sa" : "🔋 Nenabíja sa";
-      
+
       let timeInfo = "";
       if (battery.charging && battery.chargingTime !== Infinity) {
         const hours = Math.floor(battery.chargingTime / 3600);
@@ -1018,25 +1084,34 @@ function checkBattery() {
       }
 
       let status = `Úroveň batérie: ${level}%\n${charging}${timeInfo}\n\n`;
-      status += "📊 Pre Battery Health:\nNastavenia > Batéria > Stav batérie\n\n";
+      status +=
+        "📊 Pre Battery Health:\nNastavenia > Batéria > Stav batérie\n\n";
       status += "Skontroluj:\n";
       status += "• Maximum Capacity (malo by byť > 80%)\n";
       status += "• Peak Performance Capability";
 
       // Add battery event listeners
-      battery.addEventListener('chargingchange', () => {
-        const newStatus = battery.charging ? "⚡ Začalo nabíjanie" : "🔋 Nabíjanie zastavené";
+      battery.addEventListener("chargingchange", () => {
+        const newStatus = battery.charging
+          ? "⚡ Začalo nabíjanie"
+          : "🔋 Nabíjanie zastavené";
         showStatus("battery-status", status + `\n\n${newStatus}`, "info");
       });
 
-      battery.addEventListener('levelchange', () => {
+      battery.addEventListener("levelchange", () => {
         const newLevel = (battery.level * 100).toFixed(0);
-        showStatus("battery-status", status.replace(/\d+%/, newLevel + '%'), "success");
+        showStatus(
+          "battery-status",
+          status.replace(/\d+%/, newLevel + "%"),
+          "success"
+        );
       });
 
       showStatus("battery-status", status, level > 20 ? "success" : "warning");
 
-      const passed = confirm("Je stav batérie v poriadku? (Skontroluj aj Battery Health v Nastaveniach)");
+      const passed = confirm(
+        "Je stav batérie v poriadku? (Skontroluj aj Battery Health v Nastaveniach)"
+      );
       updateTestResult("battery", passed);
     });
   } else {
@@ -1045,7 +1120,9 @@ function checkBattery() {
       "Battery API nie je podporované v Safari.\n\nSkontroluj manuálne:\nNastavenia > Batéria > Stav batérie",
       "warning"
     );
-    alert("Otvor Nastavenia > Batéria > Stav batérie a skontroluj:\n• Maximum Capacity\n• Peak Performance Capability");
+    alert(
+      "Otvor Nastavenia > Batéria > Stav batérie a skontroluj:\n• Maximum Capacity\n• Peak Performance Capability"
+    );
     const passed = confirm("Je Battery Health v poriadku?");
     updateTestResult("battery", passed);
   }
@@ -1061,7 +1138,7 @@ function testCableCharging() {
   if (navigator.getBattery) {
     navigator.getBattery().then((battery) => {
       const initialCharging = battery.charging;
-      
+
       if (initialCharging) {
         showStatus(
           "charging-status",
@@ -1075,7 +1152,7 @@ function testCableCharging() {
           "⚠ Káblové nabíjanie nie je detekované. Pripoj kábel...",
           "warning"
         );
-        
+
         // Wait for charging to start
         const chargingHandler = () => {
           if (battery.charging) {
@@ -1085,15 +1162,15 @@ function testCableCharging() {
               "success"
             );
             updateTestResult("cable-charging", true);
-            battery.removeEventListener('chargingchange', chargingHandler);
+            battery.removeEventListener("chargingchange", chargingHandler);
           }
         };
-        
-        battery.addEventListener('chargingchange', chargingHandler);
-        
+
+        battery.addEventListener("chargingchange", chargingHandler);
+
         // Timeout after 10 seconds
         setTimeout(() => {
-          battery.removeEventListener('chargingchange', chargingHandler);
+          battery.removeEventListener("chargingchange", chargingHandler);
           if (!battery.charging) {
             showStatus(
               "charging-status",
@@ -1108,7 +1185,9 @@ function testCableCharging() {
     });
   } else {
     setTimeout(() => {
-      alert("Pripoj Lightning/USB-C kábel a skontroluj či sa zobrazuje ikona nabíjania.");
+      alert(
+        "Pripoj Lightning/USB-C kábel a skontroluj či sa zobrazuje ikona nabíjania."
+      );
       const passed = confirm("Nabíja sa telefón cez kábel?");
       updateTestResult("cable-charging", passed);
       showStatus(

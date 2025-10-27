@@ -27,7 +27,7 @@ jobs:
         set -o pipefail
         xcodebuild clean build \
           -project iPhoneTestSuite.xcodeproj \
-          -target iPhoneTestSuite \
+          -scheme iPhoneTestSuite \
           -sdk iphoneos \
           -configuration Release \
           -arch arm64 \
@@ -36,6 +36,14 @@ jobs:
           CODE_SIGNING_REQUIRED=NO \
           CODE_SIGNING_ALLOWED=NO \
           2>&1 | tee build.log
+        BUILD_EXIT=$?
+        echo "Build exit code: $BUILD_EXIT"
+        if [ $BUILD_EXIT -ne 0 ]; then
+          echo "::error::Build failed with exit code $BUILD_EXIT"
+          echo "Errors from build.log:"
+          grep -i "error:" build.log | tail -n 20 || echo "No 'error:' lines found"
+          exit $BUILD_EXIT
+        fi
       continue-on-error: true
       
     - name: Show compilation errors (summary)

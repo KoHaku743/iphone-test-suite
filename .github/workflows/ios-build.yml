@@ -448,41 +448,40 @@ jobs:
           build.log
         retention-days: 7
         if-no-files-found: warn
-        
+
     - name: Build summary
       if: always()
       run: |
         echo "### iOS Build Complete! 🎉" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
-        
-					if [ -f "iPhoneTestSuite.ipa" ]; then
-						IPA_SIZE=$(ls -lh iPhoneTestSuite.ipa | awk '{print $5}')
-						echo "✅ **IPA Created Successfully!**" >> $GITHUB_STEP_SUMMARY
-						echo "" >> $GITHUB_STEP_SUMMARY
-						echo "📦 **File:** \`iPhoneTestSuite.ipa\` (${IPA_SIZE})" >> $GITHUB_STEP_SUMMARY
-						echo "📱 **Target:** iOS Simulator (unsigned)" >> $GITHUB_STEP_SUMMARY
-						echo "" >> $GITHUB_STEP_SUMMARY
-						echo "### 📥 How to Install on iPhone:" >> $GITHUB_STEP_SUMMARY
-						echo "" >> $GITHUB_STEP_SUMMARY
-						echo "**Free Methods (7-day signing):**" >> $GITHUB_STEP_SUMMARY
-						echo "1. **AltStore** (Recommended) - Auto-refresh every 7 days" >> $GITHUB_STEP_SUMMARY
-						echo "   - Download: https://altstore.io" >> $GITHUB_STEP_SUMMARY
-						echo "   - Install AltServer on computer, then sideload the IPA" >> $GITHUB_STEP_SUMMARY
-						echo "" >> $GITHUB_STEP_SUMMARY
-						echo "2. **Sideloadly** - Manual refresh" >> $GITHUB_STEP_SUMMARY
-						echo "   - Download: https://sideloadly.io" >> $GITHUB_STEP_SUMMARY
-						echo "   - Drag IPA, enter Apple ID, install" >> $GITHUB_STEP_SUMMARY
-						echo "" >> $GITHUB_STEP_SUMMARY
-						echo "3. **Xcode** - Best for development" >> $GITHUB_STEP_SUMMARY
-						echo "   - Open project, connect iPhone, build & run" >> $GITHUB_STEP_SUMMARY
-						echo "" >> $GITHUB_STEP_SUMMARY
-						echo "📖 **Full instructions:** See \`INSTALL.md\` in the repository" >> $GITHUB_STEP_SUMMARY
-					else
-						echo "❌ Build failed" >> $GITHUB_STEP_SUMMARY
-					fi
-					echo "" >> $GITHUB_STEP_SUMMARY
-					echo "---" >> $GITHUB_STEP_SUMMARY
-					echo "" >> $GITHUB_STEP_SUMMARY
-					echo "**Note:** This IPA is unsigned. For physical devices:" >> $GITHUB_STEP_SUMMARY
-					echo "- Use free Apple ID with AltStore/Sideloadly (7 days)" >> $GITHUB_STEP_SUMMARY
-					echo "- Or Apple Developer account for 1-year signing ($99/year)" >> $GITHUB_STEP_SUMMARY
+        if [ -f "iPhoneTestSuite.ipa" ]; then
+          IPA_SIZE=$(ls -lh iPhoneTestSuite.ipa | awk '{print $5}')
+          echo "✅ **IPA Created Successfully!**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "📦 **File:** \`iPhoneTestSuite.ipa\` (${IPA_SIZE})" >> $GITHUB_STEP_SUMMARY
+          echo "📱 **Target:** iOS Simulator (unsigned)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📥 How to Install on iPhone:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Free Methods (7-day signing):**" >> $GITHUB_STEP_SUMMARY
+          echo "1. **AltStore** (Recommended) - Auto-refresh every 7 days" >> $GITHUB_STEP_SUMMARY
+          echo "   - Download: https://altstore.io" >> $GITHUB_STEP_SUMMARY
+          echo "   - Install AltServer on computer, then sideload the IPA" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "2. **Sideloadly** - Manual refresh" >> $GITHUB_STEP_SUMMARY
+          echo "   - Download: https://sideloadly.io" >> $GITHUB_STEP_SUMMARY
+          echo "   - Drag IPA, enter Apple ID, install" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "3. **Xcode** - Best for development" >> $GITHUB_STEP_SUMMARY
+          echo "   - Open project, connect iPhone, build & run" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "📖 **Full instructions:** See \`INSTALL.md\` in the repository" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "❌ Build failed" >> $GITHUB_STEP_SUMMARY
+        fi
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "---" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Note:** This IPA is unsigned. For physical devices:" >> $GITHUB_STEP_SUMMARY
+        echo "- Use free Apple ID with AltStore/Sideloadly (7 days)" >> $GITHUB_STEP_SUMMARY
+        echo "- Or Apple Developer account for 1-year signing ($99/year)" >> $GITHUB_STEP_SUMMARY

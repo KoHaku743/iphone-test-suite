@@ -457,10 +457,10 @@ jobs:
         echo "" >> $GITHUB_STEP_SUMMARY
         if [ -f "iPhoneTestSuite.ipa" ]; then
           IPA_SIZE=$(ls -lh iPhoneTestSuite.ipa | awk '{print $5}')
-		  echo "✅ **IPA Created Successfully!**" >> $GITHUB_STEP_SUMMARY
+					echo "✅ **IPA Created Successfully!**" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "📦 **File:** \`iPhoneTestSuite.ipa\` (${IPA_SIZE})" >> $GITHUB_STEP_SUMMARY
-		  echo "📱 **Target:** iOS Device (unsigned)" >> $GITHUB_STEP_SUMMARY
+					echo "📱 **Target:** iOS Device (unsigned)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 📥 How to Install on iPhone:" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY

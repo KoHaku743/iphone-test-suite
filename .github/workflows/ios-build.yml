@@ -385,14 +385,15 @@ jobs:
         }
         EOF
       
-    - name: Build for iOS Simulator
-      run: |
-        set -o pipefail
-        xcodebuild clean build \
+		- name: Build for iOS (device, unsigned)
+			run: |
+				set -o pipefail
+				xcodebuild clean build \
           -project iPhoneTestSuite.xcodeproj \
           -scheme iPhoneTestSuite \
-          -sdk iphonesimulator \
-          -destination 'platform=iOS Simulator,name=iPhone 15 Pro,OS=17.2' \
+					-sdk iphoneos \
+					-configuration Release \
+					-arch arm64 \
           -derivedDataPath ./DerivedData \
           CODE_SIGN_IDENTITY="" \
           CODE_SIGNING_REQUIRED=NO \
@@ -456,10 +457,10 @@ jobs:
         echo "" >> $GITHUB_STEP_SUMMARY
         if [ -f "iPhoneTestSuite.ipa" ]; then
           IPA_SIZE=$(ls -lh iPhoneTestSuite.ipa | awk '{print $5}')
-          echo "✅ **IPA Created Successfully!**" >> $GITHUB_STEP_SUMMARY
+		  echo "✅ **IPA Created Successfully!**" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "📦 **File:** \`iPhoneTestSuite.ipa\` (${IPA_SIZE})" >> $GITHUB_STEP_SUMMARY
-          echo "📱 **Target:** iOS Simulator (unsigned)" >> $GITHUB_STEP_SUMMARY
+		  echo "📱 **Target:** iOS Device (unsigned)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 📥 How to Install on iPhone:" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY

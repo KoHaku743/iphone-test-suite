@@ -414,14 +414,37 @@ jobs:
         echo "Build output location:"
         find ./DerivedData -name "*.app" -type d || echo "No .app bundles found"
         ls -la ./DerivedData/Build/Products/ || echo "Products directory not found"
+    
+    - name: Create IPA for sideloading
+      if: success()
+      run: |
+        # Find the .app bundle
+        APP_PATH=$(find ./DerivedData/Build/Products -name "*.app" -type d | head -n 1)
+        
+        if [ -n "$APP_PATH" ]; then
+          echo "Found app at: $APP_PATH"
+          
+          # Create Payload directory structure
+          mkdir -p Payload
+          cp -r "$APP_PATH" Payload/
+          
+          # Create IPA (it's just a zip file)
+          zip -r iPhoneTestSuite.ipa Payload
+          
+          echo "✅ IPA created: iPhoneTestSuite.ipa"
+          ls -lh iPhoneTestSuite.ipa
+        else
+          echo "❌ No .app bundle found"
+          exit 1
+        fi
           
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       if: success()
       with:
-        name: iPhoneTestSuite-Build
+        name: iPhoneTestSuite-IPA
         path: |
-          ./DerivedData/Build/Products/**/*.app
+          iPhoneTestSuite.ipa
           build.log
         retention-days: 7
         if-no-files-found: warn
@@ -431,10 +454,35 @@ jobs:
       run: |
         echo "### iOS Build Complete! 🎉" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
-        echo "✅ Project compiled successfully" >> $GITHUB_STEP_SUMMARY
-        echo "📱 Built for iOS Simulator" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "**Note:** To build for physical devices, you need:" >> $GITHUB_STEP_SUMMARY
-        echo "- Apple Developer account" >> $GITHUB_STEP_SUMMARY
-        echo "- Code signing certificates" >> $GITHUB_STEP_SUMMARY
-        echo "- Provisioning profiles" >> $GITHUB_STEP_SUMMARY
+        
+					if [ -f "iPhoneTestSuite.ipa" ]; then
+						IPA_SIZE=$(ls -lh iPhoneTestSuite.ipa | awk '{print $5}')
+						echo "✅ **IPA Created Successfully!**" >> $GITHUB_STEP_SUMMARY
+						echo "" >> $GITHUB_STEP_SUMMARY
+						echo "📦 **File:** \`iPhoneTestSuite.ipa\` (${IPA_SIZE})" >> $GITHUB_STEP_SUMMARY
+						echo "📱 **Target:** iOS Simulator (unsigned)" >> $GITHUB_STEP_SUMMARY
+						echo "" >> $GITHUB_STEP_SUMMARY
+						echo "### 📥 How to Install on iPhone:" >> $GITHUB_STEP_SUMMARY
+						echo "" >> $GITHUB_STEP_SUMMARY
+						echo "**Free Methods (7-day signing):**" >> $GITHUB_STEP_SUMMARY
+						echo "1. **AltStore** (Recommended) - Auto-refresh every 7 days" >> $GITHUB_STEP_SUMMARY
+						echo "   - Download: https://altstore.io" >> $GITHUB_STEP_SUMMARY
+						echo "   - Install AltServer on computer, then sideload the IPA" >> $GITHUB_STEP_SUMMARY
+						echo "" >> $GITHUB_STEP_SUMMARY
+						echo "2. **Sideloadly** - Manual refresh" >> $GITHUB_STEP_SUMMARY
+						echo "   - Download: https://sideloadly.io" >> $GITHUB_STEP_SUMMARY
+						echo "   - Drag IPA, enter Apple ID, install" >> $GITHUB_STEP_SUMMARY
+						echo "" >> $GITHUB_STEP_SUMMARY
+						echo "3. **Xcode** - Best for development" >> $GITHUB_STEP_SUMMARY
+						echo "   - Open project, connect iPhone, build & run" >> $GITHUB_STEP_SUMMARY
+						echo "" >> $GITHUB_STEP_SUMMARY
+						echo "📖 **Full instructions:** See \`INSTALL.md\` in the repository" >> $GITHUB_STEP_SUMMARY
+					else
+						echo "❌ Build failed" >> $GITHUB_STEP_SUMMARY
+					fi
+					echo "" >> $GITHUB_STEP_SUMMARY
+					echo "---" >> $GITHUB_STEP_SUMMARY
+					echo "" >> $GITHUB_STEP_SUMMARY
+					echo "**Note:** This IPA is unsigned. For physical devices:" >> $GITHUB_STEP_SUMMARY
+					echo "- Use free Apple ID with AltStore/Sideloadly (7 days)" >> $GITHUB_STEP_SUMMARY
+					echo "- Or Apple Developer account for 1-year signing ($99/year)" >> $GITHUB_STEP_SUMMARY
